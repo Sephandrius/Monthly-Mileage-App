@@ -1,589 +1,233 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>T.W. Frierson Mileage Reimbursement Processor</title>
-
-    <!-- Required external libraries -->
-    <script src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
-
+    <!-- Load libraries directly from CDNs with integrity checks -->
+    <script src="https://unpkg.com/react@17/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    
     <style>
-        /* CSS styles based on T.W. Frierson brand guidelines */
-        :root {
-            --black: #333333;
-            /* 4AM */
-            --yellow: #EBC42E;
-            /* HARD HAT */
-            --blue: #30526E;
-            /* BLUE COLLAR */
-            --brick: #BA6E4D;
-            /* BRICK */
-            --concrete: #D1CCC7;
-            /* CONCRETE */
-            --white: #FAF7F5;
-            /* REFLECTOR */
-        }
-
+        /* Basic styling */
         body {
-            font-family: 'Source Sans Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: var(--white);
-            color: var(--black);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
+            background-color: #FAF7F5;
+            color: #333333;
         }
-
+        
         header {
-            background-color: var(--black);
+            background-color: #333333;
             color: white;
-            padding: 1rem 0;
+            padding: 1rem;
+            text-align: center;
         }
-
+        
         .container {
-            width: 100%;
             max-width: 1200px;
             margin: 0 auto;
-            padding: 0 1rem;
+            padding: 20px;
         }
-
-        header .container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        
+        h1, h2 {
+            color: #333333;
         }
-
-        .logo-container {
-            display: flex;
-            align-items: center;
-        }
-
-        .logo-icon {
-            background-color: var(--yellow);
-            padding: 0.25rem;
-            border-radius: 0.25rem;
-            margin-right: 0.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .main-content {
-            flex: 1;
-            padding: 2rem 0;
-        }
-
-        h1,
-        h2,
-        h3,
-        h4,
-        h5,
-        h6 {
-            font-family: 'Zilla Slab', Georgia, serif;
-            font-weight: 600;
-        }
-
-        h2 {
-            font-size: 1.875rem;
-            margin-bottom: 1.5rem;
-            text-align: center;
-            color: var(--black);
-        }
-
-        .intro-text {
-            text-align: center;
-            max-width: 42rem;
-            margin: 0 auto 2rem;
-        }
-
+        
         .dropzone {
-            border: 4px dashed;
-            border-color: var(--yellow);
-            border-radius: 0.5rem;
-            padding: 3rem;
+            border: 3px dashed #EBC42E;
+            padding: 30px;
             text-align: center;
-            margin-bottom: 2rem;
-            transition: all 0.3s ease;
+            margin: 20px 0;
+            border-radius: 5px;
         }
-
-        .dropzone.has-files {
-            border-color: green;
-        }
-
-        .dropzone:hover {
-            border-color: var(--yellow);
-            background-color: rgba(235, 196, 46, 0.05);
-        }
-
-        .icon-container {
-            margin-bottom: 1rem;
-        }
-
-        .file-status {
-            font-size: 1.125rem;
-            font-weight: 500;
-            margin-bottom: 1rem;
-        }
-
-        .file-instructions {
-            color: #6b7280;
-            margin-bottom: 1.5rem;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.375rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            border: none;
-        }
-
-        .btn-primary {
-            background-color: var(--blue);
+        
+        button, .file-input-label {
+            background-color: #30526E;
             color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            display: inline-block;
         }
-
-        .btn-primary:hover {
-            background-color: var(--black);
-        }
-
-        .btn-secondary {
-            background-color: var(--yellow);
-            color: var(--black);
-        }
-
-        .btn-secondary:hover {
-            background-color: #d9b429;
-        }
-
+        
         .file-input {
             display: none;
         }
-
-        .alert {
-            padding: 1rem;
-            border-radius: 0.25rem;
-            margin-bottom: 2rem;
-            display: flex;
-            align-items: center;
+        
+        .process-button {
+            background-color: #EBC42E;
+            color: black;
         }
-
-        .alert-error {
-            background-color: #fee2e2;
-            border-left: 4px solid #ef4444;
-            color: #b91c1c;
-        }
-
-        .alert-icon {
-            margin-right: 0.5rem;
-        }
-
-        .results-container {
-            background: white;
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-            border-radius: 0.5rem;
-            overflow: hidden;
-            margin-bottom: 2rem;
-        }
-
-        .results-header {
-            padding: 1rem 1.5rem;
-            border-bottom: 1px solid var(--concrete);
-        }
-
-        .results-title {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--black);
-            margin: 0;
-        }
-
-        .results-subtitle {
-            margin-top: 0.5rem;
-            font-size: 0.875rem;
-            color: #6b7280;
-        }
-
+        
         table {
             width: 100%;
             border-collapse: collapse;
+            margin: 20px 0;
         }
-
-        th {
-            padding: 0.75rem 1.5rem;
+        
+        th, td {
+            border: 1px solid #D1CCC7;
+            padding: 8px;
             text-align: left;
-            font-size: 0.75rem;
-            font-weight: 500;
-            color: #6b7280;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            background-color: var(--concrete);
         }
-
-        td {
-            padding: 1rem 1.5rem;
-            white-space: nowrap;
-            font-size: 0.875rem;
+        
+        th {
+            background-color: #D1CCC7;
         }
-
-        tr {
-            border-bottom: 1px solid var(--concrete);
+        
+        tr:hover {
+            background-color: #f5f5f5;
         }
-
-        tbody tr:hover {
-            background-color: rgba(209, 204, 199, 0.1);
+        
+        .error {
+            color: red;
+            background-color: #fee;
+            padding: 10px;
+            border-left: 3px solid red;
+            margin: 10px 0;
         }
-
-        .employee-name {
-            font-weight: 500;
-            color: var(--black);
-        }
-
-        .file-name {
-            font-size: 0.75rem;
-            color: #6b7280;
-        }
-
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 0.25rem 0.5rem;
-            font-size: 0.75rem;
-            font-weight: 600;
-            border-radius: 9999px;
-        }
-
-        .badge-valid {
-            background-color: #d1fae5;
-            color: #065f46;
-        }
-
-        .badge-error {
-            background-color: #fee2e2;
-            color: #b91c1c;
-        }
-
-        .badge-icon {
-            margin-right: 0.25rem;
-        }
-
-        .btn-toggle {
-            display: flex;
-            align-items: center;
-            color: var(--blue);
-            background: none;
-            border: none;
-            padding: 0;
-            font: inherit;
-            cursor: pointer;
-        }
-
-        .btn-toggle:hover {
-            color: var(--black);
-        }
-
-        .toggle-icon {
-            margin-left: 0.25rem;
-        }
-
-        .details-row {
-            background-color: var(--concrete);
-        }
-
-        .details-content {
-            padding: 1rem 1.5rem;
-        }
-
-        .details-title {
-            font-size: 0.875rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-        }
-
-        .details-table th,
-        .details-table td {
-            font-size: 0.75rem;
-            padding: 0.5rem 1rem;
-        }
-
-        .details-table th {
-            background-color: rgba(0, 0, 0, 0.1);
-        }
-
-        .details-table tbody {
-            background-color: white;
-        }
-
-        .details-table tr.total-row {
-            background-color: var(--concrete);
-            font-weight: 700;
-        }
-
-        .error-text {
-            color: #b91c1c;
-            font-size: 0.75rem;
-            margin-left: 0.5rem;
-        }
-
-        .results-footer {
-            padding: 1rem 1.5rem;
-            background-color: var(--concrete);
-            text-align: right;
-        }
-
-        .btn-export {
-            background-color: var(--black);
-            color: white;
-            display: inline-flex;
-            align-items: center;
-        }
-
-        .btn-export:hover {
-            background-color: #1f2937;
-        }
-
-        .btn-export-icon {
-            margin-right: 0.5rem;
-        }
-
+        
         footer {
-            background-color: var(--black);
+            background-color: #333333;
             color: white;
-            padding: 1.5rem 0;
             text-align: center;
-            margin-top: auto;
-        }
-
-        .footer-logo {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 0.5rem;
-        }
-
-        .footer-icon {
-            background-color: var(--yellow);
-            padding: 0.25rem;
-            border-radius: 9999px;
-            margin-right: 0.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .footer-text {
-            font-size: 0.75rem;
-        }
-
-        .overflow-container {
-            overflow-x: auto;
+            padding: 10px;
+            margin-top: 50px;
         }
     </style>
 </head>
-
 <body>
-    <div id="root"></div>
+    <header>
+        <h1>T.W. FRIERSON CONTRACTOR, INC.</h1>
+        <p>Mileage Reimbursement Processor</p>
+    </header>
+    
+    <div id="app" class="container">
+        <p>Loading application...</p>
+    </div>
+    
+    <footer>
+        <p>T.W. FRIERSON CONTRACTOR, INC. - Building with Purpose</p>
+    </footer>
 
     <script type="text/babel">
-        // Helper components for icons
-        const FileIcon = (props) => (
-            <svg width={props.size || 24} height={props.size || 24} viewBox="0 0 24 24" fill="none" stroke={props.color || "currentColor"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                <polyline points="14 2 14 8 20 8"></polyline>
-                <line x1="16" y1="13" x2="8" y2="13"></line>
-                <line x1="16" y1="17" x2="8" y2="17"></line>
-                <polyline points="10 9 9 9 8 9"></polyline>
-            </svg>
-        );
-
-        const AlertCircleIcon = (props) => (
-            <svg width={props.size || 24} height={props.size || 24} viewBox="0 0 24 24" fill="none" stroke={props.color || "currentColor"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="8" x2="12" y2="12"></line>
-                <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-        );
-
-        const CheckIcon = (props) => (
-            <svg width={props.size || 24} height={props.size || 24} viewBox="0 0 24 24" fill="none" stroke={props.color || "currentColor"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="20 6 9 17 4 12"></polyline>
-            </svg>
-        );
-
-        const ChevronDownIcon = (props) => (
-            <svg width={props.size || 24} height={props.size || 24} viewBox="0 0 24 24" fill="none" stroke={props.color || "currentColor"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="6 9 12 15 18 9"></polyline>
-            </svg>
-        );
-
-        const ChevronUpIcon = (props) => (
-            <svg width={props.size || 24} height={props.size || 24} viewBox="0 0 24 24" fill="none" stroke={props.color || "currentColor"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="18 15 12 9 6 15"></polyline>
-            </svg>
-        );
-
-        const DownloadIcon = (props) => (
-            <svg width={props.size || 24} height={props.size || 24} viewBox="0 0 24 24" fill="none" stroke={props.color || "currentColor"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="7 10 12 15 17 10"></polyline>
-                <line x1="12" y1="15" x2="12" y2="3"></line>
-            </svg>
-        );
-
+        // Basic React component
         function MileageProcessor() {
             const [files, setFiles] = React.useState([]);
             const [employees, setEmployees] = React.useState([]);
             const [loading, setLoading] = React.useState(false);
             const [error, setError] = React.useState(null);
-            const [mostCommonRate, setMostCommonRate] = React.useState(null);
             const [expandedEmployee, setExpandedEmployee] = React.useState(null);
-            const [processingComplete, setProcessingComplete] = React.useState(false);
-
-            // Handle file drop
-            const handleDrop = (e) => {
-                e.preventDefault();
-                setError(null);
-
-                const droppedFiles = e.dataTransfer.files;
-                if (droppedFiles.length > 0) {
-                    setFiles(Array.from(droppedFiles));
-                    processFiles(Array.from(droppedFiles));
-                }
-            };
-
-            // Handle file selection via input
+            
+            // Handle file selection
             const handleFileSelect = (e) => {
-                setError(null);
-
                 const selectedFiles = e.target.files;
                 if (selectedFiles.length > 0) {
                     setFiles(Array.from(selectedFiles));
-                    processFiles(Array.from(selectedFiles));
                 }
             };
-
-            // Prevent default behaviors for drag events
-            const preventDefaults = (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-            };
-
-            // Process the uploaded files
-            const processFiles = async (files) => {
+            
+            // Process files button
+            const processFiles = async () => {
                 setLoading(true);
-                setProcessingComplete(false);
-                setEmployees([]);
-
+                setError(null);
+                
                 try {
                     const processedEmployees = [];
-                    const ratesCount = {};
-
+                    const rates = {};
+                    
                     for (const file of files) {
-                        const arrayBuffer = await file.arrayBuffer();
-                        const workbook = XLSX.read(arrayBuffer, {
-                            type: 'array',
-                            cellStyles: true,
-                            cellFormulas: true,
-                            cellDates: true,
-                            cellNF: true,
-                            sheetStubs: true
-                        });
-
-                        const firstSheetName = workbook.SheetNames[0];
-                        const worksheet = workbook.Sheets[firstSheetName];
-
                         try {
-                            // Get employee data
+                            const arrayBuffer = await file.arrayBuffer();
+                            const workbook = XLSX.read(arrayBuffer, {type: 'array'});
+                            
+                            const firstSheetName = workbook.SheetNames[0];
+                            const worksheet = workbook.Sheets[firstSheetName];
+                            
+                            // Extract data
                             const employeeName = worksheet['B2']?.v || 'Unknown';
                             const totalMiles = parseFloat(worksheet['B3']?.v) || 0;
                             const irsRate = parseFloat(worksheet['B4']?.v) || 0;
                             const reportedReimbursement = parseFloat(worksheet['B5']?.v) || 0;
-
-                            // Count IRS rates for consensus
-                            ratesCount[irsRate] = (ratesCount[irsRate] || 0) + 1;
-
+                            
+                            rates[irsRate] = (rates[irsRate] || 0) + 1;
+                            
                             // Get individual entries
                             const entries = [];
                             let rowIndex = 7;
                             let entryTotalMiles = 0;
-
+                            
                             while (worksheet[`A${rowIndex}`]) {
                                 const date = worksheet[`A${rowIndex}`]?.v || '';
                                 const purpose = worksheet[`B${rowIndex}`]?.v || '';
                                 const description = worksheet[`C${rowIndex}`]?.v || '';
                                 const miles = parseFloat(worksheet[`D${rowIndex}`]?.v) || 0;
-
+                                
                                 entries.push({
                                     date,
                                     purpose,
                                     description,
                                     miles
                                 });
-
+                                
                                 entryTotalMiles += miles;
                                 rowIndex++;
                             }
-
-                            // Validate miles match
+                            
+                            // Validation
                             const milesMatch = Math.abs(totalMiles - entryTotalMiles) < 0.01;
-
+                            
                             processedEmployees.push({
                                 name: employeeName,
                                 fileName: file.name,
                                 totalMiles,
                                 irsRate,
                                 reportedReimbursement,
-                                calculatedReimbursement: entryTotalMiles * irsRate,
                                 entries,
                                 milesMatch,
-                                entryTotalMiles
+                                entryTotalMiles,
+                                calculatedReimbursement: entryTotalMiles * irsRate
                             });
                         } catch (err) {
                             console.error(`Error processing file ${file.name}:`, err);
-                            setError(`Error processing file ${file.name}. Please check that the file format matches the expected format.`);
+                            setError(`Error processing file ${file.name}. Please check the file format.`);
                         }
                     }
-
-                    // Find most common IRS rate
+                    
+                    // Find most common rate
+                    let mostCommonRate = 0;
                     let maxCount = 0;
-                    let mostCommonRate = null;
-
-                    Object.entries(ratesCount).forEach(([rate, count]) => {
+                    
+                    Object.entries(rates).forEach(([rate, count]) => {
                         if (count > maxCount) {
                             maxCount = count;
                             mostCommonRate = parseFloat(rate);
                         }
                     });
-
-                    setMostCommonRate(mostCommonRate);
-
-                    // Recalculate reimbursements with consensus rate
+                    
+                    // Apply consensus rate
                     const finalEmployees = processedEmployees.map(employee => ({
                         ...employee,
                         consensusRate: mostCommonRate,
                         consensusReimbursement: employee.entryTotalMiles * mostCommonRate
                     }));
-
+                    
                     setEmployees(finalEmployees);
-                    setProcessingComplete(true);
                 } catch (err) {
-                    console.error(err);
+                    console.error("General processing error:", err);
                     setError("Error processing files. Please make sure all files are valid Excel spreadsheets.");
                 } finally {
                     setLoading(false);
                 }
             };
-
-            // Toggle expanded employee view
+            
+            // Toggle expanded view
             const toggleEmployeeExpand = (index) => {
                 if (expandedEmployee === index) {
                     setExpandedEmployee(null);
@@ -591,275 +235,161 @@
                     setExpandedEmployee(index);
                 }
             };
-
-            // Export data to Excel
+            
+            // Export to Excel
             const exportToExcel = () => {
                 const exportData = employees.map(employee => ({
                     'Employee Name': employee.name,
                     'Total Miles': employee.entryTotalMiles,
                     'Reimbursement': employee.consensusReimbursement.toFixed(2)
                 }));
-
+                
                 const worksheet = XLSX.utils.json_to_sheet(exportData);
                 const workbook = XLSX.utils.book_new();
                 XLSX.utils.book_append_sheet(workbook, worksheet, "Mileage Reimbursements");
-
-                // Generate a filename with current date
+                
+                // Generate filename
                 const date = new Date();
                 const month = String(date.getMonth() + 1).padStart(2, '0');
                 const year = date.getFullYear();
                 const filename = `TW_Frierson_Mileage_${month}_${year}.xlsx`;
-
+                
                 XLSX.writeFile(workbook, filename);
             };
-
+            
             return (
                 <div>
-                    {/* Header */}
-                    <header>
-                        <div className="container">
-                            <div className="logo-container">
-                                <div className="logo-icon">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <path d="M9 18l6-6-6-6" stroke="#333333" />
-                                    </svg>
-                                </div>
-                                <h1 className="text-xl font-bold">T.W. FRIERSON</h1>
+                    <h2>Mileage Reimbursement Processor</h2>
+                    
+                    <p>
+                        Upload Excel files containing employee mileage data. The app will process them
+                        and create a summary report.
+                    </p>
+                    
+                    <div className="dropzone">
+                        <p>Select Excel files with employee mileage data</p>
+                        
+                        <label className="file-input-label">
+                            Select Files
+                            <input 
+                                type="file" 
+                                multiple 
+                                onChange={handleFileSelect} 
+                                className="file-input" 
+                                accept=".xlsx,.xls"
+                            />
+                        </label>
+                        
+                        {files.length > 0 && (
+                            <div>
+                                <p>{files.length} file(s) selected</p>
+                                <button className="process-button" onClick={processFiles} disabled={loading}>
+                                    {loading ? 'Processing...' : 'Process Files'}
+                                </button>
                             </div>
-                            <div className="text-sm">CONTRACTOR, INC.</div>
-                        </div>
-                    </header>
-
-                    <div className="main-content">
-                        <div className="container">
-                            <h2>Mileage Reimbursement Processor</h2>
-
-                            <p className="intro-text">
-                                Drop a folder containing employee mileage spreadsheets or select files to process. The app will validate the data, calculate reimbursements, and generate a summary report.
-                            </p>
-
-                            {/* File Drop Zone */}
-                            <div
-                                className={`dropzone ${files.length > 0 ? 'has-files' : ''}`}
-                                onDrop={handleDrop}
-                                onDragOver={preventDefaults}
-                                onDragEnter={preventDefaults}
-                                onDragLeave={preventDefaults}
-                            >
-                                <div className="icon-container">
-                                    <FileIcon size={48} color={files.length > 0 ? 'green' : '#30526E'} />
-                                </div>
-
-                                <p className="file-status">
-                                    {files.length > 0
-                                        ? `${files.length} file${files.length !== 1 ? 's' : ''} selected`
-                                        : 'Drag & drop folder or files here'}
-                                </p>
-
-                                <p className="file-instructions">
-                                    {files.length > 0
-                                        ? `Click "Process Files" to analyze the data`
-                                        : 'Or select files using the button below'}
-                                </p>
-
-                                <div>
-                                    <label className="btn btn-primary">
-                                        Select Files
-                                        <input
-                                            type="file"
-                                            multiple
-                                            onChange={handleFileSelect}
-                                            className="file-input"
-                                            accept=".xlsx,.xls"
-                                        />
-                                    </label>
-
-                                    {files.length > 0 && (
-                                        <button
-                                            onClick={() => processFiles(files)}
-                                            className="btn btn-secondary ml-4"
-                                            style={{ marginLeft: '1rem' }}
-                                            disabled={loading}
-                                        >
-                                            {loading ? 'Processing...' : 'Process Files'}
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Error Message */}
-                            {error && (
-                                <div className="alert alert-error" role="alert">
-                                    <AlertCircleIcon className="alert-icon" size={20} />
-                                    <p>{error}</p>
-                                </div>
-                            )}
-
-                            {/* Results */}
-                            {processingComplete && employees.length > 0 && (
-                                <div className="results-container">
-                                    <div className="results-header">
-                                        <h3 className="results-title">
-                                            Mileage Summary
-                                        </h3>
-                                        <p className="results-subtitle">
-                                            Consensus IRS rate: ${mostCommonRate?.toFixed(3) || 'N/A'} per mile
-                                        </p>
-                                    </div>
-
-                                    <div className="overflow-container">
-                                        <table>
-                                            <thead>
-                                                <tr>
-                                                    <th>Employee</th>
-                                                    <th>Total Miles</th>
-                                                    <th>Reimbursement</th>
-                                                    <th>Status</th>
-                                                    <th>Details</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {employees.map((employee, index) => (
-                                                    <React.Fragment key={index}>
-                                                        <tr>
-                                                            <td>
-                                                                <div className="employee-name">{employee.name}</div>
-                                                                <div className="file-name">{employee.fileName}</div>
-                                                            </td>
-                                                            <td>
-                                                                <div>
-                                                                    {employee.entryTotalMiles.toFixed(1)}
-                                                                    {!employee.milesMatch && (
-                                                                        <span className="error-text">
-                                                                            (Reported: {employee.totalMiles.toFixed(1)})
-                                                                        </span>
-                                                                    )}
-                                                                </div>
-                                                            </td>
-                                                            <td>
-                                                                <div>
-                                                                    ${employee.consensusReimbursement.toFixed(2)}
-                                                                    {Math.abs(employee.consensusReimbursement - employee.reportedReimbursement) > 0.01 && (
-                                                                        <span className="error-text">
-                                                                            (Reported: ${employee.reportedReimbursement.toFixed(2)})
-                                                                        </span>
-                                                                    )}
-                                                                </div>
-                                                                <div className="file-name">
-                                                                    Rate: ${employee.consensusRate.toFixed(3)}
-                                                                    {employee.irsRate !== employee.consensusRate && (
-                                                                        <span className="error-text">
-                                                                            (Reported: ${employee.irsRate.toFixed(3)})
-                                                                        </span>
-                                                                    )}
-                                                                </div>
-                                                            </td>
-                                                            <td>
-                                                                {employee.milesMatch && Math.abs(employee.consensusReimbursement - employee.reportedReimbursement) <= 0.01 ? (
-                                                                    <span className="badge badge-valid">
-                                                                        <CheckIcon size={16} className="badge-icon" /> Valid
-                                                                    </span>
-                                                                ) : (
-                                                                    <span className="badge badge-error">
-                                                                        <AlertCircleIcon size={16} className="badge-icon" /> Discrepancy
-                                                                    </span>
-                                                                )}
-                                                            </td>
-                                                            <td>
-                                                                <button
-                                                                    onClick={() => toggleEmployeeExpand(index)}
-                                                                    className="btn-toggle"
-                                                                >
-                                                                    {expandedEmployee === index ? (
-                                                                        <>Hide <ChevronUpIcon size={16} className="toggle-icon" /></>
-                                                                    ) : (
-                                                                        <>View <ChevronDownIcon size={16} className="toggle-icon" /></>
-                                                                    )}
-                                                                </button>
-                                                            </td>
-                                                        </tr>
-
-                                                        {/* Expanded details */}
-                                                        {expandedEmployee === index && (
-                                                            <tr className="details-row">
-                                                                <td colSpan="5" className="details-content">
-                                                                    <h4 className="details-title">Trip Details</h4>
-                                                                    <div className="overflow-container">
-                                                                        <table className="details-table">
-                                                                            <thead>
-                                                                                <tr>
-                                                                                    <th>Date</th>
-                                                                                    <th>Purpose</th>
-                                                                                    <th>Description</th>
-                                                                                    <th>Miles</th>
-                                                                                </tr>
-                                                                            </thead>
-                                                                            <tbody>
-                                                                                {employee.entries.map((entry, entryIndex) => (
-                                                                                    <tr key={entryIndex}>
-                                                                                        <td>
-                                                                                            {typeof entry.date === 'string' ? entry.date : (entry.date instanceof Date ? entry.date.toLocaleDateString() : String(entry.date))}
-                                                                                        </td>
-                                                                                        <td>{entry.purpose}</td>
-                                                                                        <td>{entry.description}</td>
-                                                                                        <td>{entry.miles.toFixed(1)}</td>
-                                                                                    </tr>
-                                                                                ))}
-                                                                                <tr className="total-row">
-                                                                                    <td colSpan="3" style={{ textAlign: 'right' }}>
-                                                                                        Total:
-                                                                                    </td>
-                                                                                    <td>
-                                                                                        {employee.entryTotalMiles.toFixed(1)}
-                                                                                    </td>
-                                                                                </tr>
-                                                                            </tbody>
-                                                                        </table>
-                                                                    </div>
-                                                                </td>
-                                                            </tr>
-                                                        )}
-                                                    </React.Fragment>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
-
-                                    <div className="results-footer">
-                                        <button
-                                            onClick={exportToExcel}
-                                            className="btn btn-export"
-                                        >
-                                            <DownloadIcon size={16} className="btn-export-icon" />
-                                            Export Summary to Excel
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
+                        )}
                     </div>
-
-                    {/* Footer */}
-                    <footer>
-                        <div className="container">
-                            <div className="footer-logo">
-                                <div className="footer-icon">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <path d="M9 18l6-6-6-6" stroke="#333333" />
-                                    </svg>
-                                </div>
-                                <p>T.W. FRIERSON CONTRACTOR, INC.</p>
-                            </div>
-                            <p className="footer-text">Building with Purpose</p>
+                    
+                    {error && <div className="error">{error}</div>}
+                    
+                    {employees.length > 0 && (
+                        <div>
+                            <h3>Results</h3>
+                            <p>Consensus IRS rate: ${employees[0].consensusRate.toFixed(3)} per mile</p>
+                            
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Employee</th>
+                                        <th>Total Miles</th>
+                                        <th>Reimbursement</th>
+                                        <th>Status</th>
+                                        <th>Details</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {employees.map((employee, index) => (
+                                        <React.Fragment key={index}>
+                                            <tr>
+                                                <td>{employee.name}<br /><small>{employee.fileName}</small></td>
+                                                <td>
+                                                    {employee.entryTotalMiles.toFixed(1)}
+                                                    {!employee.milesMatch && 
+                                                        <div style={{color: 'red'}}>
+                                                            (Reported: {employee.totalMiles.toFixed(1)})
+                                                        </div>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    ${employee.consensusReimbursement.toFixed(2)}
+                                                    <br />
+                                                    <small>
+                                                        Rate: ${employee.consensusRate.toFixed(3)}
+                                                        {employee.irsRate !== employee.consensusRate && 
+                                                            <span style={{color: 'red'}}>
+                                                                (Reported: ${employee.irsRate.toFixed(3)})
+                                                            </span>
+                                                        }
+                                                    </small>
+                                                </td>
+                                                <td>
+                                                    {employee.milesMatch && Math.abs(employee.consensusReimbursement - employee.reportedReimbursement) <= 0.01 
+                                                        ? <span style={{color: 'green'}}>✓ Valid</span>
+                                                        : <span style={{color: 'red'}}>⚠ Discrepancy</span>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    <button onClick={() => toggleEmployeeExpand(index)}>
+                                                        {expandedEmployee === index ? 'Hide' : 'View'}
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            
+                                            {expandedEmployee === index && (
+                                                <tr>
+                                                    <td colSpan="5" style={{backgroundColor: '#f9f9f9'}}>
+                                                        <h4>Trip Details</h4>
+                                                        <table>
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>Date</th>
+                                                                    <th>Purpose</th>
+                                                                    <th>Description</th>
+                                                                    <th>Miles</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                {employee.entries.map((entry, i) => (
+                                                                    <tr key={i}>
+                                                                        <td>{entry.date}</td>
+                                                                        <td>{entry.purpose}</td>
+                                                                        <td>{entry.description}</td>
+                                                                        <td>{entry.miles.toFixed(1)}</td>
+                                                                    </tr>
+                                                                ))}
+                                                                <tr style={{fontWeight: 'bold'}}>
+                                                                    <td colSpan="3" style={{textAlign: 'right'}}>Total:</td>
+                                                                    <td>{employee.entryTotalMiles.toFixed(1)}</td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </React.Fragment>
+                                    ))}
+                                </tbody>
+                            </table>
+                            
+                            <button onClick={exportToExcel}>Export Summary to Excel</button>
                         </div>
-                    </footer>
+                    )}
                 </div>
             );
         }
-
-        // Render the application
-        ReactDOM.render(<MileageProcessor />, document.getElementById('root'));
+        
+        // Render the app
+        ReactDOM.render(<MileageProcessor />, document.getElementById('app'));
     </script>
 </body>
-
 </html>
