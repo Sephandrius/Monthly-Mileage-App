@@ -681,6 +681,8 @@
       const [expandedEmployee, setExpandedEmployee] = React.useState(null);
       const [processingComplete, setProcessingComplete] = React.useState(false);
       const [isDragging, setIsDragging] = React.useState(false);
+      const [rateOverride, setRateOverride] = React.useState("");
+      const [useRateOverride, setUseRateOverride] = React.useState(false);
       
 // Replace the handleDrop function with this improved version
 const handleDrop = (e) => {
@@ -909,14 +911,16 @@ const getAllFilesFromEntry = (entry) => {
             }
           });
           
-          setMostCommonRate(consensusRate);
-          
-          // Apply consensus rate
-          const finalEmployees = processedEmployees.map(employee => ({
-            ...employee,
-            consensusRate,
-            consensusReimbursement: employee.entryTotalMiles * consensusRate
-          }));
+// Apply rate override if enabled
+const finalRate = useRateOverride && rateOverride ? parseFloat(rateOverride) : consensusRate;
+setMostCommonRate(finalRate);
+
+// Apply consensus rate or override rate
+const finalEmployees = processedEmployees.map(employee => ({
+  ...employee,
+  consensusRate: finalRate,
+  consensusReimbursement: employee.entryTotalMiles * finalRate
+}));
           
           setEmployees(finalEmployees);
           setProcessingComplete(true);
@@ -947,7 +951,7 @@ const toggleEmployeeExpand = (index) => {
           ["T.W. FRIERSON MILEAGE SUMMARY"],
           [""],
           ["Report Date:", new Date().toLocaleDateString()],
-          ["IRS Mileage Rate:", "$" + mostCommonRate.toFixed(3) + " per mile"],
+          ["IRS Mileage Rate:", "$" + mostCommonRate.toFixed(3) + " per mile" + (useRateOverride ? " (Manually Overridden)" : "")],
           [""],
           ["Employee Name", "Total Miles", "Reimbursement Amount"]
         ];
@@ -1036,6 +1040,55 @@ if (ws[totalReimbCell]) {
       
       return (
         <div>
+{/* Rate Override Feature */}
+<div style={{
+  border: "1px solid var(--border-color)",
+  borderRadius: "6px",
+  padding: "15px",
+  marginBottom: "20px",
+  backgroundColor: "var(--black)"
+}}>
+  <h4 style={{
+    color: "var(--yellow)",
+    marginBottom: "10px",
+    fontSize: "16px",
+    fontWeight: "600"
+  }}>IRS Rate Override</h4>
+  
+  <div style={{display: "flex", alignItems: "center", gap: "15px"}}>
+    <div style={{display: "flex", alignItems: "center"}}>
+      <input
+        type="checkbox"
+        id="use-override"
+        checked={useRateOverride}
+        onChange={(e) => setUseRateOverride(e.target.checked)}
+        style={{marginRight: "8px"}}
+      />
+      <label htmlFor="use-override">Override consensus rate</label>
+    </div>
+    
+    <div style={{display: "flex", alignItems: "center", flex: "1"}}>
+      <label htmlFor="rate-override" style={{marginRight: "8px"}}>Rate ($):</label>
+      <input
+        type="number"
+        id="rate-override"
+        value={rateOverride}
+        onChange={(e) => setRateOverride(e.target.value)}
+        disabled={!useRateOverride}
+        min="0"
+        step="0.001"
+        style={{
+          padding: "6px 10px",
+          borderRadius: "4px",
+          border: "1px solid var(--border-color)",
+          backgroundColor: "#2A2A2A",
+          color: "var(--text-color)",
+          width: "100px"
+        }}
+      />
+    </div>
+  </div>
+</div>
           <div 
             className={`drop-area ${isDragging ? 'active' : ''} ${files.length > 0 ? 'has-files' : ''}`}
             onDrop={handleDrop}
@@ -1119,9 +1172,11 @@ if (ws[totalReimbCell]) {
               <div className="results-header">
                 <div>
                   <h3 className="results-title">Mileage Summary</h3>
-                  <p className="results-subtitle">
-                    Consensus IRS rate: ${mostCommonRate.toFixed(3)} per mile
-                  </p>
+<p className="results-subtitle">
+  {useRateOverride && rateOverride ? 
+    `Overridden IRS rate: $${parseFloat(rateOverride).toFixed(3)} per mile` : 
+    `Consensus IRS rate: $${mostCommonRate.toFixed(3)} per mile`}
+</p>
                 </div>
                 <button 
                   className="upload-button"
