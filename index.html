@@ -5,14 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>T.W. FRIERSON Mileage Reimbursement Processor</title>
   
+  <!-- Google Fonts: Source Sans Pro and Bitter (similar to Zilla Slab) -->
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&family=Bitter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
   <!-- Load libraries directly from CDNs -->
   <script src="https://unpkg.com/react@17/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
-  
-  <!-- Google Fonts: Source Sans Pro and Bitter (similar to Zilla Slab) -->
-  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&family=Bitter:wght@400;500;600;700&display=swap" rel="stylesheet">
   
   <style>
     /* T.W. Frierson brand colors */
@@ -662,218 +662,222 @@
   </style>
 </head>
 <body>
-  <header>
-    <div class="container">
-      <div class="header-content">
-        <div class="logo-container">
-          <div class="logo-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 4C7.58 4 4 7.58 4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7c0-4.42-3.58-8-8-8z"></path>
-              <path d="M8 12h8"></path>
-              <path d="M9 17v-5"></path>
-              <path d="M15 17v-5"></path>
-            </svg>
-          </div>
-          <h1 class="company-name">T.W. FRIERSON</h1>
-        </div>
-        <div class="company-title">CONTRACTOR, INC.</div>
-      </div>
-    </div>
-  </header>
+  <div id="app"></div>
   
-  <main>
-    <div class="container">
-      <h2 class="tagline">MILEAGE REIMBURSEMENT PROCESSOR</h2>
-      
-      <!-- Instructions Section -->
-      <div class="training-box">
-        <div class="training-header" onclick="toggleInstructions()">
-          <span>How to Use This Tool</span>
-          <span id="instruction-arrow">▼</span>
-        </div>
-        <div id="training-content" class="training-content">
-          <h4>What is this tool for?</h4>
-          <p>This tool processes employee mileage reimbursement spreadsheets and generates a summary report for payroll processing. The conversion happens entirely in your browser - no files are uploaded to any server.</p>
-          
-          <h4>Step-by-Step Instructions</h4>
-          <ol>
-            <li><strong>Select your files:</strong> You have two options:
-              <ul>
-                <li><strong>Drag and drop:</strong> Drag a folder or individual Excel files into the drop area.</li>
-                <li><strong>Select files:</strong> Click the "Select Files" button and choose one or more Excel spreadsheets.</li>
-              </ul>
-            </li>
-            <li><strong>Process the files:</strong> Click the "Process Files" button. The app will extract all mileage data.</li>
-            <li><strong>Review the summary:</strong> The app will show a summary of all employees, their total miles, and reimbursement amounts.</li>
-            <li><strong>Check for discrepancies:</strong> Any issues will be flagged with a "Discrepancy" indicator.</li>
-            <li><strong>View trip details:</strong> Click "View" next to any employee to see their individual trip records.</li>
-            <li><strong>Export the summary:</strong> Click "Export to Excel" to download a consolidated spreadsheet for payroll processing.</li>
-          </ol>
-          
-          <h4>Expected File Format</h4>
-          <p>Each employee's Excel spreadsheet should have:</p>
-          <ul>
-            <li>Employee name in cell <strong>B2</strong></li>
-            <li>Total miles in cell <strong>B3</strong></li>
-            <li>IRS rate (as a decimal) in cell <strong>B4</strong></li>
-            <li>Reimbursement amount in cell <strong>B5</strong></li>
-            <li>Individual trips starting at row <strong>7</strong> with:</li>
-            <ul>
-              <li>Column A: Date</li>
-              <li>Column B: Purpose</li>
-              <li>Column C: Description</li>
-              <li>Column D: Miles</li>
-            </ul>
-          </ul>
-          
-          <div class="note">
-            <p><strong>Note:</strong> The app automatically finds the most common IRS rate across all spreadsheets and uses that for calculations. This helps catch outdated rates in some employees' files.</p>
-          </div>
-          
-          <h4>Need More Help?</h4>
-          <p>If you encounter any issues or have questions about using this tool, please contact the IT department for assistance.</p>
-        </div>
-      </div>
-      
-      <div class="app-container">
-        <!-- File Drop Zone -->
-        <div id="drop-area" class="drop-area">
-          <div class="icon-container">
-            <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="#30526E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-              <polyline points="14 2 14 8 20 8"></polyline>
-              <line x1="16" y1="13" x2="8" y2="13"></line>
-              <line x1="16" y1="17" x2="8" y2="17"></line>
-              <polyline points="10 9 9 9 8 9"></polyline>
-            </svg>
-          </div>
-          
-          <div id="dropzone-text">
-            <div class="dropzone-instructions">
-              <p><strong>Drag & drop</strong> a folder or Excel files here</p>
-              <p>- OR -</p>
-            </div>
-          </div>
-          
-          <div class="button-group">
-            <label class="btn btn-primary">
-              Select Files
-              <input 
-                type="file" 
-                id="file-input" 
-                multiple 
-                class="file-input" 
-                accept=".xlsx,.xls"
-              />
-            </label>
-            
-            <button 
-              id="process-btn"
-              class="btn btn-secondary" 
-              style="display: none;"
-            >
-              Process Files
-            </button>
-          </div>
-        </div>
-        
-        <!-- Error Message -->
-        <div id="error-container" class="error-container" style="display: none;">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="error-icon">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="12" y1="8" x2="12" y2="12"></line>
-            <line x1="12" y1="16" x2="12.01" y2="16"></line>
-          </svg>
-          <p id="error-text"></p>
-        </div>
-        
-        <!-- Results -->
-        <div id="results-container" class="results-container" style="display: none;">
-          <div class="results-header">
-            <div>
-              <h3 class="results-title">Mileage Summary</h3>
-              <p id="rate-text" class="results-subtitle">
-                Consensus IRS rate: $0.000 per mile
-              </p>
-            </div>
-            <button 
-              id="export-btn"
-              class="btn btn-export"
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="7 10 12 15 17 10"></polyline>
-                <line x1="12" y1="15" x2="12" y2="3"></line>
-              </svg>
-              Export to Excel
-            </button>
-          </div>
-          
-          <div class="table-responsive">
-            <table>
-              <thead>
-                <tr>
-                  <th>Employee</th>
-                  <th>Total Miles</th>
-                  <th>Reimbursement</th>
-                  <th>Status</th>
-                  <th>Details</th>
-                </tr>
-              </thead>
-              <tbody id="results-body">
-                <!-- Results will be added here -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-        
-        <!-- Security Notice -->
-        <div class="security-notice">
-          <h3>No Surprises</h3>
-          <p>This tool operates entirely within your browser. No files are uploaded to external servers, making it safe for confidential company information. Your data never leaves your device.</p>
-        </div>
-      </div>
-    </div>
-  </main>
-  
-  <!-- Footer -->
-  <footer>
-    <div class="container">
-      <div class="footer-content">
-        <div class="footer-logo">
-          <div class="footer-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 4C7.58 4 4 7.58 4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7c0-4.42-3.58-8-8-8z"></path>
-              <path d="M8 12h8"></path>
-              <path d="M9 17v-5"></path>
-              <path d="M15 17v-5"></path>
-            </svg>
-          </div>
-          <div class="footer-name">T.W. FRIERSON CONTRACTOR, INC.</div>
-        </div>
-        <div class="footer-message">Build with Purpose</div>
-      </div>
-    </div>
-  </footer>
-  
-  <!-- Loading Overlay -->
-  <div id="loading-overlay" class="loading-overlay" style="display: none;">
-    <div>
-      <div class="loading-spinner"></div>
-      <div class="loading-text">Processing files...</div>
-    </div>
-  </div>
-
-  <script>
-    // Global variables
-    let files = [];
-    let employees = [];
-    let mostCommonRate = 0;
-    let expandedEmployee = null;
+  <script type="text/babel">
+    // Icon Components
+    const FileIcon = ({size = 24, color = "currentColor"}) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+        <polyline points="14 2 14 8 20 8"></polyline>
+        <line x1="16" y1="13" x2="8" y2="13"></line>
+        <line x1="16" y1="17" x2="8" y2="17"></line>
+        <polyline points="10 9 9 9 8 9"></polyline>
+      </svg>
+    );
     
-    // DOM Elements
-    const dropArea = document.getElementById('drop-area');
-    const fileInput = document.getElementById('file-input');
-    const processBtn = document.getElementById('process-btn');
-    const resultsContainer = document.getElementById('results-container');
-    const resultsBody = document.getElementById('results-body');
+    const CheckIcon = ({size = 24, color = "currentColor"}) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+    );
+    
+    const AlertIcon = ({size = 24, color = "currentColor"}) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+    );
+    
+    const ChevronDownIcon = ({size = 24, color = "currentColor"}) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
+    );
+    
+    const ChevronUpIcon = ({size = 24, color = "currentColor"}) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="18 15 12 9 6 15"></polyline>
+      </svg>
+    );
+    
+    const DownloadIcon = ({size = 24, color = "currentColor"}) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+        <polyline points="7 10 12 15 17 10"></polyline>
+        <line x1="12" y1="15" x2="12" y2="3"></line>
+      </svg>
+    );
+    
+    const HelmetIcon = ({size = 24, color = "currentColor"}) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 4C7.58 4 4 7.58 4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7c0-4.42-3.58-8-8-8z"></path>
+        <path d="M8 12h8"></path>
+        <path d="M9 17v-5"></path>
+        <path d="M15 17v-5"></path>
+      </svg>
+    );
+    
+    // Helper function to format Excel serial date
+    const formatExcelDate = (serialDate) => {
+      if (!serialDate) return '';
+      
+      // Check if it's already a formatted date string
+      if (typeof serialDate === 'string' && 
+          (serialDate.includes('/') || serialDate.includes('-'))) {
+        return serialDate;
+      }
+      
+      try {
+        // Parse the Excel serial date
+        const excelEpoch = new Date(1900, 0, 1);
+        const daysSinceEpoch = serialDate - 1; // Adjust for Excel's start date
+        const millisecondsSinceEpoch = daysSinceEpoch * 24 * 60 * 60 * 1000;
+        const date = new Date(excelEpoch.getTime() + millisecondsSinceEpoch);
+        
+        // Format date as MM/DD/YYYY
+        return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+      } catch (e) {
+        console.error("Error formatting date:", e);
+        return String(serialDate); // Return original value if parsing fails
+      }
+    };
+    
+    function MileageProcessor() {
+      const [files, setFiles] = React.useState([]);
+      const [employees, setEmployees] = React.useState([]);
+      const [loading, setLoading] = React.useState(false);
+      const [error, setError] = React.useState(null);
+      const [mostCommonRate, setMostCommonRate] = React.useState(null);
+      const [expandedEmployee, setExpandedEmployee] = React.useState(null);
+      const [processingComplete, setProcessingComplete] = React.useState(false);
+      const [isDragging, setIsDragging] = React.useState(false);
+      const [showInstructions, setShowInstructions] = React.useState(false);
+      
+      // Toggle instructions
+      const toggleInstructions = () => {
+        setShowInstructions(!showInstructions);
+      };
+      
+      // Handle file drop
+      const handleDrop = (e) => {
+        e.preventDefault();
+        setError(null);
+        setIsDragging(false);
+        
+        const items = e.dataTransfer.items;
+        const droppedFiles = [];
+        let pendingFiles = 0;
+        
+        // Process all dropped items (files and folders)
+        const processEntry = async (entry) => {
+          if (entry.isFile) {
+            if (entry.name.endsWith('.xlsx') || entry.name.endsWith('.xls')) {
+              pendingFiles++;
+              entry.file(file => {
+                droppedFiles.push(file);
+                pendingFiles--;
+                
+                // When all files are processed
+                if (pendingFiles === 0 && droppedFiles.length > 0) {
+                  setFiles(droppedFiles);
+                }
+              });
+            }
+          } else if (entry.isDirectory) {
+            pendingFiles++;
+            const dirReader = entry.createReader();
+            dirReader.readEntries(entries => {
+              entries.forEach(subEntry => processEntry(subEntry));
+              pendingFiles--;
+            });
+          }
+        };
+        
+        // If webkitGetAsEntry is available (Chrome, Edge)
+        if (items && items[0]?.webkitGetAsEntry) {
+          for (let i = 0; i < items.length; i++) {
+            const entry = items[i].webkitGetAsEntry();
+            if (entry) {
+              processEntry(entry);
+            }
+          }
+        } else {
+          // Fallback to regular files
+          const files = e.dataTransfer.files;
+          if (files.length > 0) {
+            const validFiles = Array.from(files).filter(
+              file => file.name.endsWith('.xlsx') || file.name.endsWith('.xls')
+            );
+            
+            if (validFiles.length > 0) {
+              setFiles(validFiles);
+            } else {
+              setError("No Excel files found. Please upload .xlsx or .xls files.");
+            }
+          }
+        }
+      };
+      
+      // Handle file selection via input
+      const handleFileSelect = (e) => {
+        setError(null);
+        
+        const selectedFiles = e.target.files;
+        if (selectedFiles.length > 0) {
+          const validFiles = Array.from(selectedFiles).filter(
+            file => file.name.endsWith('.xlsx') || file.name.endsWith('.xls')
+          );
+          
+          if (validFiles.length > 0) {
+            setFiles(validFiles);
+          } else {
+            setError("No Excel files found. Please select .xlsx or .xls files.");
+          }
+        }
+      };
+      
+      // Process files
+      const processFiles = async () => {
+        if (files.length === 0) return;
+        
+        setLoading(true);
+        setError(null);
+        setProcessingComplete(false);
+        setEmployees([]);
+        
+        try {
+          const processedEmployees = [];
+          const ratesCount = {};
+          
+          for (const file of files) {
+            try {
+              const arrayBuffer = await file.arrayBuffer();
+              const workbook = XLSX.read(arrayBuffer, {
+                type: 'array',
+                cellDates: true
+              });
+              
+              const firstSheetName = workbook.SheetNames[0];
+              const worksheet = workbook.Sheets[firstSheetName];
+              
+              // Get employee data
+              const employeeName = worksheet['B2']?.v || 'Unknown';
+              const totalMiles = parseFloat(worksheet['B3']?.v) || 0;
+              const irsRate = parseFloat(worksheet['B4']?.v) || 0;
+              const reportedReimbursement = parseFloat(worksheet['B5']?.v) || 0;
+              
+              // Count IRS rates for consensus
+              ratesCount[irsRate] = (ratesCount[irsRate] || 0) + 1;
+              
+              // Get individual entries
+              const entries = [];
+              let rowIndex = 7;
+              let entryTotalMiles = 0;
+              
+              while (worksheet[`A${rowIndex}`]) {
+                const date = worksheet[`A${rowIndex}`]?.v || '';
+                const purpose = worksheet[`B${rowIndex}`]?.v || '';
+                const description = worksheet[`C${rowIndex}`]?.v || '';
+                const miles = parseFloat(worksheet[`D${rowIndex}`]
