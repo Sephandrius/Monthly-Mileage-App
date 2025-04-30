@@ -679,25 +679,104 @@
       const [processingComplete, setProcessingComplete] = React.useState(false);
       const [isDragging, setIsDragging] = React.useState(false);
       
-      // Handle file drop
-      const handleDrop = (e) => {
-        e.preventDefault();
-        setError(null);
-        setIsDragging(false);
-        
-        const droppedFiles = e.dataTransfer.files;
-        if (droppedFiles && droppedFiles.length > 0) {
-          const validFiles = Array.from(droppedFiles).filter(
-            file => file.name.endsWith('.xlsx') || file.name.endsWith('.xls')
-          );
-          
-          if (validFiles.length > 0) {
-            setFiles(validFiles);
-          } else {
-            setError("No Excel files found. Please upload .xlsx or .xls files.");
-          }
+// Replace the handleDrop function with this improved version
+const handleDrop = (e) => {
+  e.preventDefault();
+  setError(null);
+  setIsDragging(false);
+  
+  // Check if DataTransferItemList is supported and contains items
+  if (e.dataTransfer.items) {
+    const items = e.dataTransfer.items;
+    const promises = [];
+    
+    // Process all dropped items (files or folders)
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      // Use webkitGetAsEntry to access folder contents
+      if (item.kind === 'file') {
+        const entry = item.webkitGetAsEntry();
+        if (entry && entry.isDirectory) {
+          // Get files from directory recursively
+          promises.push(getAllFilesFromEntry(entry));
+        } else if (entry && entry.isFile) {
+          // Process single file
+          promises.push(new Promise(resolve => {
+            entry.file(file => {
+              if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+                resolve([file]);
+              } else {
+                resolve([]);
+              }
+            });
+          }));
         }
+      }
+    }
+    
+    // Wait for all file promises to resolve
+    Promise.all(promises).then(fileArrays => {
+      const allFiles = fileArrays.flat();
+      if (allFiles.length > 0) {
+        setFiles(allFiles);
+      } else {
+        setError("No Excel files found. Please upload .xlsx or .xls files.");
+      }
+    });
+  } else {
+    // Fallback for browsers not supporting DataTransferItemList
+    const droppedFiles = e.dataTransfer.files;
+    if (droppedFiles && droppedFiles.length > 0) {
+      const validFiles = Array.from(droppedFiles).filter(
+        file => file.name.endsWith('.xlsx') || file.name.endsWith('.xls')
+      );
+      
+      if (validFiles.length > 0) {
+        setFiles(validFiles);
+      } else {
+        setError("No Excel files found. Please upload .xlsx or .xls files.");
+      }
+    }
+  }
+};
+
+// Add this helper function to recursively get files from directories
+const getAllFilesFromEntry = (entry) => {
+  return new Promise(resolve => {
+    if (entry.isFile) {
+      entry.file(file => {
+        if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+          resolve([file]);
+        } else {
+          resolve([]);
+        }
+      });
+    } else if (entry.isDirectory) {
+      const dirReader = entry.createReader();
+      const allFiles = [];
+      
+      // Function to read all directory entries
+      const readEntries = () => {
+        dirReader.readEntries(entries => {
+          if (entries.length === 0) {
+            // No more entries, resolve with all files
+            Promise.all(allFiles).then(fileArrays => {
+              resolve(fileArrays.flat());
+            });
+          } else {
+            // Process entries and continue reading
+            for (let i = 0; i < entries.length; i++) {
+              allFiles.push(getAllFilesFromEntry(entries[i]));
+            }
+            readEntries(); // Continue reading
+          }
+        });
       };
+      
+      readEntries(); // Start reading
+    }
+  });
+};
       
       // Handle file selection via input
       const handleFileSelect = (e) => {
@@ -901,23 +980,43 @@ const toggleEmployeeExpand = (index) => {
           { wch: 20 }  // Column C
         ];
         
-        // Format numbers
-        // Loop through rows 6 and beyond (after the headers)
-        for (let i = 6; i < summaryData.length; i++) {
-          // Format miles (column B)
-          if (i < summaryData.length - 1) { // Skip empty row
-            const milesCell = XLSX.utils.encode_cell({r: i, c: 1});
-            if (ws[milesCell]) {
-              ws[milesCell].z = "0.0";
-            }
-            
-            // Format reimbursement (column C)
-            const reimburseCell = XLSX.utils.encode_cell({r: i, c: 2});
-            if (ws[reimburseCell]) {
-              ws[reimburseCell].z = "$0.00";
-            }
-          }
-        }
+// Update this part in the exportToExcel function where you're formatting cells
+// Replace the existing formatting loop with this improved one:
+
+// Format numbers - specifically target all data rows including the total row
+for (let i = 6; i < summaryData.length; i++) {
+  // Skip the empty row before totals
+  if (summaryData[i][0] !== "") {
+    // Format miles (column B)
+    const milesCell = XLSX.utils.encode_cell({r: i, c: 1});
+    if (ws[milesCell] && ws[milesCell].v) {
+      ws[milesCell].z = "0.0";
+    }
+    
+    // Format reimbursement (column C)
+    const reimburseCell = XLSX.utils.encode_cell({r: i, c: 2});
+    if (ws[reimburseCell] && ws[reimburseCell].v) {
+      ws[reimburseCell].z = "$0.00";
+    }
+  }
+}
+
+// Add specific styling for the TOTAL row
+// Get the index of the TOTAL row (last row of data)
+const totalRowIndex = summaryData.length - 1;
+const totalMilesCell = XLSX.utils.encode_cell({r: totalRowIndex, c: 1});
+const totalReimbCell = XLSX.utils.encode_cell({r: totalRowIndex, c: 2});
+
+// Apply bold style and formatting to the total row
+if (ws[totalMilesCell]) {
+  ws[totalMilesCell].z = "0.0";
+  ws[totalMilesCell].s = { font: { bold: true } };
+}
+
+if (ws[totalReimbCell]) {
+  ws[totalReimbCell].z = "$0.00";
+  ws[totalReimbCell].s = { font: { bold: true } };
+}
         
         // Add the worksheet to the workbook
         XLSX.utils.book_append_sheet(wb, ws, "Mileage Summary");
