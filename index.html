@@ -266,8 +266,59 @@
                         and create a summary report.
                     </p>
                     
-                    <div className="dropzone">
-                        <p>Select Excel files with employee mileage data</p>
+                    <div 
+                        className="dropzone" 
+                        onDrop={(e) => {
+                            e.preventDefault();
+                            const items = e.dataTransfer.items;
+                            const fileList = [];
+                            
+                            // Process all dropped items (files and folders)
+                            const processEntry = async (entry) => {
+                                if (entry.isFile) {
+                                    entry.file(file => {
+                                        if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+                                            fileList.push(file);
+                                        }
+                                    });
+                                } else if (entry.isDirectory) {
+                                    const dirReader = entry.createReader();
+                                    dirReader.readEntries(entries => {
+                                        entries.forEach(entry => processEntry(entry));
+                                    });
+                                }
+                            };
+                            
+                            // If webkitGetAsEntry is available (Chrome, Edge)
+                            if (items[0].webkitGetAsEntry) {
+                                for (let i = 0; i < items.length; i++) {
+                                    const entry = items[i].webkitGetAsEntry();
+                                    if (entry) {
+                                        processEntry(entry);
+                                    }
+                                }
+                            } else {
+                                // Fallback to files
+                                const files = e.dataTransfer.files;
+                                for (let i = 0; i < files.length; i++) {
+                                    if (files[i].name.endsWith('.xlsx') || files[i].name.endsWith('.xls')) {
+                                        fileList.push(files[i]);
+                                    }
+                                }
+                            }
+                            
+                            // Update state after processing
+                            setTimeout(() => {
+                                if (fileList.length > 0) {
+                                    setFiles(fileList);
+                                }
+                            }, 100);
+                        }}
+                        onDragOver={(e) => e.preventDefault()}
+                        onDragEnter={(e) => e.preventDefault()}
+                    >
+                        <p>Drag & drop a folder or files containing employee mileage data</p>
+                        <p>- OR -</p>
                         
                         <label className="file-input-label">
                             Select Files
