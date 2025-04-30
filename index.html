@@ -554,7 +554,7 @@
       <h4>TIPS FOR SUCCESS</h4>
       <div class="note">
         <p><strong>Note:</strong> If you're working with a large number of files, the processing might take a few minutes. Please be patient and don't close the browser window during processing.</p>
-        <p>Each spreadsheet should have employee name in cell B2, total miles in B3, IRS rate in B4, reimbursement amount in B5, and trip entries starting from row 7.</p>
+        <p>Each spreadsheet should have employee name in cell D2, total miles in D3, IRS rate in D4, reimbursement amount in D5, and trip entries starting from row 7.</p>
       </div>
       
       <h4>TROUBLESHOOTING</h4>
@@ -562,7 +562,8 @@
         <li><strong>No files appear after selection:</strong> Make sure you're selecting Excel files (.xlsx or .xls).</li>
         <li><strong>The "PROCESS FILES" button is grayed out:</strong> You need to select at least one Excel file before processing.</li>
         <li><strong>Invalid data warnings:</strong> If you see discrepancy warnings, check that the reported totals match the sum of individual trips.</li>
-      </ol>
+       <li><strong>Still have issues?</strong> Contact Joseph Winters for any further support.</li>      
+</ol>
     </div>
   </div>
   
@@ -572,7 +573,8 @@
     <div class="security-notice">
       <h3>NO SURPRISES</h3>
       <p>This tool operates entirely within your browser. No files are uploaded to external servers, making it safe for confidential company documents. Your data never leaves your device.</p>
-    </div>
+<p>Created for T.W. Frierson by Joseph Winters.</p>   
+ </div>
   </div>
   
   <script type="text/babel">
@@ -840,10 +842,10 @@ const getAllFilesFromEntry = (entry) => {
               const worksheet = workbook.Sheets[firstSheetName];
               
               // Get employee data
-              const employeeName = worksheet['B2']?.v || 'Unknown';
-              const totalMiles = parseFloat(worksheet['B3']?.v) || 0;
-              const irsRate = parseFloat(worksheet['B4']?.v) || 0;
-              const reportedReimbursement = parseFloat(worksheet['B5']?.v) || 0;
+              const employeeName = worksheet['D2']?.v || 'Unknown';
+              const totalMiles = parseFloat(worksheet['D3']?.v) || 0;
+              const irsRate = parseFloat(worksheet['D4']?.v) || 0;
+              const reportedReimbursement = parseFloat(worksheet['D5']?.v) || 0;
               
               // Count IRS rates for consensus
               ratesCount[irsRate] = (ratesCount[irsRate] || 0) + 1;
