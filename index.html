@@ -1,1163 +1,1125 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>T.W. Frierson Mileage Reimbursement Processor</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>T.W. FRIERSON Mileage Reimbursement Processor</title>
+  
+  <!-- Load libraries directly from CDNs -->
+  <script src="https://unpkg.com/react@17/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+  
+  <!-- Google Fonts: Franklin Gothic or similar -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      /* T.W. Frierson brand colors */
+      --black: #1F1F1F;
+      --darker-black: #151515;
+      --yellow: #EBC42E;
+      --blue: #30526E;
+      --brick: #BA6E4D;
+      --concrete: #D1CCC7;
+      --white: #FAF7F5;
+      --border-color: #444444;
+      --text-color: var(--white);
+      --text-secondary: #BBBBBB;
+    }
     
-    <!-- Load libraries directly from CDNs -->
-    <script src="https://unpkg.com/react@17/umd/react.production.min.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js" crossorigin></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
     
-    <!-- Google Fonts: Source Sans Pro and Bitter (similar to Zilla Slab) -->
-    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&family=Bitter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    body {
+      font-family: 'Roboto', 'Franklin Gothic', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+      max-width: 850px;
+      margin: 0 auto;
+      padding: 30px;
+      color: var(--text-color);
+      line-height: 1.6;
+      background-color: var(--darker-black);
+    }
     
-    <style>
-        /* T.W. Frierson brand colors */
-        :root {
-            --black: #333333; /* 4AM */
-            --yellow: #EBC42E; /* HARD HAT */
-            --blue: #30526E; /* BLUE COLLAR */
-            --brick: #BA6E4D; /* BRICK */
-            --concrete: #D1CCC7; /* CONCRETE */
-            --white: #FAF7F5; /* REFLECTOR */
-        }
-        
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-        
-        body {
-            font-family: 'Source Sans Pro', -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: var(--white);
-            color: var(--black);
-            line-height: 1.6;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        header {
-            background-color: var(--black);
-            color: white;
-            padding: 1.5rem 0;
-        }
-        
-        .container {
-            width: 90%;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .logo-container {
-            display: flex;
-            align-items: center;
-        }
-        
-        .logo-icon {
-            background-color: var(--yellow);
-            width: 40px;
-            height: 40px;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 15px;
-        }
-        
-        .company-name {
-            font-size: 1.5rem;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-        }
-        
-        .company-title {
-            font-size: 0.9rem;
-            font-weight: 400;
-            letter-spacing: 1px;
-        }
-        
-        main {
-            flex: 1;
-            padding: 3rem 0;
-        }
-        
-        h1, h2, h3, h4, h5, h6 {
-            font-family: 'Bitter', Georgia, serif;
-            font-weight: 600;
-            margin-bottom: 1rem;
-        }
-        
-        h2 {
-            font-size: 2.2rem;
-            text-align: center;
-            margin-bottom: 1.5rem;
-        }
-        
-        h3 {
-            font-size: 1.5rem;
-            border-bottom: 3px solid var(--yellow);
-            padding-bottom: 0.5rem;
-            margin-bottom: 1.5rem;
-            display: inline-block;
-        }
-        
-        .intro-text {
-            text-align: center;
-            max-width: 700px;
-            margin: 0 auto 2.5rem;
-        }
-        
-        .dropzone {
-            border: 4px dashed var(--yellow);
-            border-radius: 8px;
-            padding: 2.5rem;
-            margin-bottom: 2.5rem;
-            text-align: center;
-            transition: all 0.3s ease;
-            background-color: rgba(235, 196, 46, 0.05);
-            position: relative;
-        }
-        
-        .dropzone:hover, .dropzone.active {
-            background-color: rgba(235, 196, 46, 0.1);
-        }
-        
-        .dropzone.has-files {
-            border-color: #27ae60; /* Green for success */
-            background-color: rgba(39, 174, 96, 0.05);
-        }
-        
-        .icon-container {
-            margin-bottom: 1.5rem;
-        }
-        
-        .dropzone-icon {
-            font-size: 2.5rem;
-            color: var(--blue);
-        }
-        
-        .files-selected {
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            color: var(--black);
-        }
-        
-        .dropzone-instructions {
-            margin-bottom: 1.5rem;
-            color: #666;
-        }
-        
-        .button-group {
-            margin-top: 1.5rem;
-        }
-        
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0.75rem 1.5rem;
-            border-radius: 6px;
-            font-family: 'Source Sans Pro', sans-serif;
-            font-weight: 600;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: none;
-            outline: none;
-            margin: 0 0.5rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .btn-primary {
-            background-color: var(--blue);
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background-color: #264056;
-        }
-        
-        .btn-secondary {
-            background-color: var(--yellow);
-            color: var(--black);
-        }
-        
-        .btn-secondary:hover {
-            background-color: #d4b32a;
-        }
-        
-        .file-input {
-            display: none;
-        }
-        
-        .error-container {
-            background-color: #ffebee;
-            border-left: 5px solid #f44336;
-            color: #d32f2f;
-            padding: 1rem 1.5rem;
-            border-radius: 4px;
-            margin-bottom: 2rem;
-            display: flex;
-            align-items: center;
-        }
-        
-        .error-icon {
-            margin-right: 1rem;
-            flex-shrink: 0;
-        }
-        
-        .results-container {
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            margin-bottom: 2.5rem;
-        }
-        
-        .results-header {
-            padding: 1.5rem 2rem;
-            background-color: var(--concrete);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .results-title {
-            margin: 0;
-            font-size: 1.5rem;
-        }
-        
-        .results-subtitle {
-            color: var(--blue);
-            font-weight: 600;
-            margin-top: 0.25rem;
-        }
-        
-        .table-responsive {
-            overflow-x: auto;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        thead {
-            background-color: var(--concrete);
-            border-bottom: 2px solid #999;
-        }
-        
-        th {
-            text-align: left;
-            padding: 1rem 1.5rem;
-            font-family: 'Bitter', serif;
-            font-weight: 600;
-            color: var(--black);
-            text-transform: uppercase;
-            font-size: 0.875rem;
-            letter-spacing: 0.05rem;
-        }
-        
-        td {
-            padding: 1rem 1.5rem;
-            border-bottom: 1px solid #e0e0e0;
-            vertical-align: middle;
-        }
-        
-        tbody tr:hover {
-            background-color: rgba(209, 204, 199, 0.1);
-        }
-        
-        .employee-name {
-            font-weight: 600;
-            font-size: 1.05rem;
-            color: var(--black);
-        }
-        
-        .file-name {
-            font-size: 0.85rem;
-            color: #777;
-            margin-top: 0.25rem;
-        }
-        
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 0.25rem 0.75rem;
-            border-radius: 999px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-        
-        .badge-valid {
-            background-color: #d4edda;
-            color: #155724;
-        }
-        
-        .badge-error {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-        
-        .icon-sm {
-            margin-right: 0.35rem;
-        }
-        
-        .view-toggle {
-            background: none;
-            border: none;
-            color: var(--blue);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            font-weight: 600;
-            padding: 0.25rem 0.5rem;
-            transition: color 0.3s;
-        }
-        
-        .view-toggle:hover {
-            color: var(--black);
-        }
-        
-        .toggle-icon {
-            margin-left: 0.5rem;
-        }
-        
-        .details-row {
-            background-color: #f8f8f8;
-        }
-        
-        .details-content {
-            padding: 1.5rem 2rem;
-        }
-        
-        .details-title {
-            margin-bottom: 1rem;
-            font-size: 1.1rem;
-            display: flex;
-            align-items: center;
-        }
-        
-        .details-table th,
-        .details-table td {
-            padding: 0.75rem 1rem;
-            font-size: 0.9rem;
-        }
-        
-        .details-table tr:last-child td {
-            border-bottom: none;
-        }
-        
-        .total-row {
-            background-color: var(--concrete);
-            font-weight: 700;
-        }
-        
-        .error-text {
-            color: #dc3545;
-            font-size: 0.85rem;
-            margin-left: 0.5rem;
-        }
-        
-        .results-footer {
-            padding: 1.25rem 2rem;
-            background-color: var(--concrete);
-            display: flex;
-            justify-content: flex-end;
-        }
-        
-        footer {
-            background-color: var(--black);
-            color: white;
-            padding: 2rem 0;
-            text-align: center;
-            margin-top: auto;
-        }
-        
-        .footer-content {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        
-        .footer-logo {
-            display: flex;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-        
-        .footer-icon {
-            width: 36px;
-            height: 36px;
-            background-color: var(--yellow);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 1rem;
-        }
-        
-        .footer-name {
-            font-weight: 600;
-            letter-spacing: 0.05rem;
-            text-transform: uppercase;
-        }
-        
-        .footer-message {
-            color: #aaa;
-            margin-top: 0.5rem;
-            font-size: 0.9rem;
-        }
-        
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-        
-        .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 5px solid var(--concrete);
-            border-top-color: var(--yellow);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-        
-        .loading-text {
-            color: white;
-            margin-top: 1rem;
-            font-size: 1.2rem;
-        }
-        
-        .core-values {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-around;
-            margin: 2rem 0;
-            gap: 1rem;
-        }
-        
-        .core-value {
-            background-color: white;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            border-radius: 8px;
-            padding: 1.5rem;
-            text-align: center;
-            flex: 1;
-            min-width: 200px;
-            max-width: 250px;
-            border-top: 4px solid var(--yellow);
-        }
-        
-        .core-value h4 {
-            color: var(--blue);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 1rem;
-        }
-        
-        .core-value p {
-            color: var(--black);
-            font-size: 0.9rem;
-        }
-        
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            .header-content {
-                flex-direction: column;
-                align-items: center;
-                text-align: center;
-            }
-            
-            .company-title {
-                margin-top: 0.5rem;
-            }
-            
-            h2 {
-                font-size: 1.8rem;
-            }
-            
-            .dropzone {
-                padding: 1.5rem;
-            }
-            
-            .btn {
-                padding: 0.6rem 1.2rem;
-                font-size: 0.9rem;
-                margin-bottom: 0.5rem;
-            }
-            
-            .button-group {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-            }
-            
-            th, td {
-                padding: 0.75rem;
-            }
-            
-            .core-values {
-                flex-direction: column;
-                align-items: center;
-            }
-            
-            .core-value {
-                max-width: 100%;
-            }
-        }
-    </style>
+    h1 {
+      text-align: center;
+      margin-bottom: 10px;
+      color: var(--yellow);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .tagline {
+      text-align: center;
+      color: var(--concrete);
+      margin-bottom: 30px;
+      font-size: 18px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .training-box {
+      margin-bottom: 30px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    
+    .training-header {
+      background-color: var(--blue);
+      color: var(--white);
+      padding: 12px 15px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+    
+    .training-header:hover {
+      background-color: #3A6082;
+    }
+    
+    .training-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out;
+      background-color: var(--black);
+      padding: 0 15px;
+    }
+    
+    .training-content.show {
+      max-height: 2000px;
+      padding: 15px;
+      transition: max-height 0.5s ease-in, padding 0.3s linear;
+    }
+    
+    .container {
+      background-color: var(--black);
+      border-radius: 6px;
+      padding: 35px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border-color);
+    }
+    
+    .drop-area {
+      border: 2px dashed var(--yellow);
+      border-radius: 6px;
+      padding: 40px 25px;
+      text-align: center;
+      margin-bottom: 25px;
+      background-color: #2A2A2A;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .drop-area:hover, .drop-area.active {
+      background-color: #252525;
+      border-color: var(--yellow);
+    }
+    
+    .drop-area.has-files {
+      border-color: #27ae60;
+    }
+    
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    
+    .file-input {
+      display: none;
+    }
+    
+    .upload-button {
+      background-color: var(--yellow);
+      color: var(--black);
+      border: none;
+      padding: 12px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      min-width: 120px;
+    }
+    
+    .upload-button:hover {
+      background-color: #D9B52A;
+      transform: translateY(-1px);
+    }
+    
+    .convert-button {
+      display: block;
+      background-color: #444444;
+      color: var(--white);
+      border: none;
+      padding: 14px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      margin: 25px auto;
+      transition: all 0.2s ease;
+      max-width: 250px;
+      width: 100%;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .convert-button:hover:not(:disabled) {
+      background-color: #555555;
+      transform: translateY(-1px);
+    }
+    
+    .convert-button:disabled {
+      background-color: #333333;
+      color: #777777;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .progress-container {
+      margin-top: 25px;
+      display: none;
+    }
+    
+    .progress-bar {
+      height: 10px;
+      background-color: #333333;
+      border-radius: 5px;
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+    
+    .progress {
+      height: 100%;
+      background-color: var(--yellow);
+      width: 0%;
+      transition: width 0.3s;
+      border-radius: 5px;
+    }
+    
+    .status {
+      font-size: 14px;
+      color: var(--text-secondary);
+      text-align: center;
+    }
+    
+    .file-list {
+      margin-top: 25px;
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      padding: 15px;
+      background-color: var(--black);
+    }
+    
+    .results-container {
+      margin-top: 25px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    
+    .results-header {
+      background-color: #2A2A2A;
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .results-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin: 0;
+    }
+    
+    .results-subtitle {
+      color: var(--yellow);
+      font-size: 14px;
+      margin-top: 5px;
+    }
+    
+    .table-responsive {
+      overflow-x: auto;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    th {
+      background-color: #2A2A2A;
+      padding: 10px 15px;
+      text-align: left;
+      font-weight: 500;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-color);
+      text-transform: uppercase;
+      font-size: 12px;
+      letter-spacing: 0.05em;
+    }
+    
+    td {
+      padding: 10px 15px;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-color);
+    }
+    
+    tr:hover {
+      background-color: #2A2A2A;
+    }
+    
+    .employee-name {
+      font-weight: 600;
+      color: var(--yellow);
+    }
+    
+    .file-name {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 3px;
+    }
+    
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 8px;
+      border-radius: 3px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    
+    .badge-valid {
+      background-color: rgba(39, 174, 96, 0.2);
+      color: #27ae60;
+    }
+    
+    .badge-error {
+      background-color: rgba(186, 110, 77, 0.2);
+      color: var(--brick);
+    }
+    
+    .error-text {
+      color: var(--brick);
+      font-size: 12px;
+      margin-top: 2px;
+    }
+    
+    .view-toggle {
+      background: none;
+      border: none;
+      color: var(--yellow);
+      cursor: pointer;
+      padding: 3px 8px;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      transition: color 0.2s;
+    }
+    
+    .view-toggle:hover {
+      color: white;
+    }
+    
+    .toggle-icon {
+      margin-left: 5px;
+    }
+    
+    .details-row {
+      background-color: #252525;
+    }
+    
+    .details-content {
+      padding: 15px;
+    }
+    
+    .details-title {
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      font-size: 16px;
+      font-weight: 500;
+    }
+    
+    .details-table th,
+    .details-table td {
+      padding: 8px 12px;
+      font-size: 13px;
+    }
+    
+    .total-row {
+      background-color: #333333;
+      font-weight: 600;
+    }
+    
+    .error-container {
+      background-color: rgba(186, 110, 77, 0.15);
+      border-radius: 4px;
+      padding: 12px 15px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      border-left: 4px solid var(--brick);
+    }
+    
+    .error-icon {
+      margin-right: 10px;
+      flex-shrink: 0;
+    }
+    
+    .security-notice {
+      margin-top: 30px;
+      background-color: rgba(186, 110, 77, 0.15);
+      border-radius: 4px;
+      padding: 15px 20px;
+      border-left: 4px solid var(--brick);
+    }
+    
+    .security-notice h3 {
+      margin-top: 0;
+      margin-bottom: 8px;
+      color: var(--brick);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .security-notice p {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+    
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #333333;
+      border-top-color: var(--yellow);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+    
+    .loading-text {
+      color: white;
+      margin-top: 15px;
+      font-size: 16px;
+    }
+    
+    /* Scrollbar styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: #1a1a1a;
+      border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: #444444;
+      border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: #555555;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      body {
+        padding: 15px;
+      }
+      
+      .container {
+        padding: 20px;
+      }
+      
+      .drop-area {
+        padding: 30px 15px;
+      }
+      
+      .button-group {
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .upload-button {
+        width: 100%;
+        margin-bottom: 10px;
+      }
+    }
+  </style>
 </head>
 <body>
+  <h1>T.W. FRIERSON</h1>
+  <h2 class="tagline">Mileage Reimbursement Processor</h2>
+  
+  <div class="training-box">
+    <div class="training-header" onclick="toggleTraining()">
+      <span>How to Use This Tool</span>
+      <span id="training-arrow">▼</span>
+    </div>
+    <div id="training-content" class="training-content">
+      <p>This tool processes employee mileage spreadsheets for reimbursement. Upload Excel files containing mileage data, and the tool will:
+      <ul>
+        <li>Validate mileage totals against individual entries</li>
+        <li>Apply the correct IRS reimbursement rate</li>
+        <li>Generate a summary report for payroll processing</li>
+      </ul>
+      </p>
+      
+      <h4>Step-by-Step Instructions</h4>
+      <ol>
+        <li><strong>Select Files:</strong> Either drag and drop Excel files or use the "Select Files" button</li>
+        <li><strong>Upload a Folder:</strong> Alternatively, you can upload an entire folder of spreadsheets</li>
+        <li><strong>Process Files:</strong> Click the "Process Files" button to analyze the data</li>
+        <li><strong>Review Results:</strong> Check for any discrepancies highlighted in the summary</li>
+        <li><strong>Export:</strong> Click "Export to Excel" to create a report for payroll</li>
+      </ol>
+      
+      <p>Each spreadsheet should have employee name in cell B2, total miles in B3, IRS rate in B4, and individual trip entries starting at row 7.</p>
+    </div>
+  </div>
+  
+  <div class="container">
     <div id="app"></div>
     
-    <script type="text/babel">
-        // Icon Components
-        const FileIcon = ({size = 24, color = "currentColor"}) => (
-            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                <polyline points="14 2 14 8 20 8"></polyline>
-                <line x1="16" y1="13" x2="8" y2="13"></line>
-                <line x1="16" y1="17" x2="8" y2="17"></line>
-                <polyline points="10 9 9 9 8 9"></polyline>
-            </svg>
-        );
-        
-        const CheckIcon = ({size = 24, color = "currentColor"}) => (
-            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="20 6 9 17 4 12"></polyline>
-            </svg>
-        );
-        
-        const AlertIcon = ({size = 24, color = "currentColor"}) => (
-            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="8" x2="12" y2="12"></line>
-                <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-        );
-        
-        const ChevronDownIcon = ({size = 24, color = "currentColor"}) => (
-            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="6 9 12 15 18 9"></polyline>
-            </svg>
-        );
-        
-        const ChevronUpIcon = ({size = 24, color = "currentColor"}) => (
-            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="18 15 12 9 6 15"></polyline>
-            </svg>
-        );
-        
-        const DownloadIcon = ({size = 24, color = "currentColor"}) => (
-            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="7 10 12 15 17 10"></polyline>
-                <line x1="12" y1="15" x2="12" y2="3"></line>
-            </svg>
-        );
-        
-        const HelmetIcon = ({size = 24, color = "currentColor"}) => (
-            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 4C7.58 4 4 7.58 4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7c0-4.42-3.58-8-8-8z"></path>
-                <path d="M8 12h8"></path>
-                <path d="M9 17v-5"></path>
-                <path d="M15 17v-5"></path>
-            </svg>
-        );
-        
-        // Helper function to format Excel serial date
-        const formatExcelDate = (serialDate) => {
-            if (!serialDate) return '';
-            
-            try {
-                // Check if it's already a formatted date string
-                if (typeof serialDate === 'string' && 
-                    (serialDate.includes('/') || serialDate.includes('-'))) {
-                    return serialDate;
-                }
-                
-                // Try to parse the date as a number
-                const numericDate = parseFloat(serialDate);
-                if (isNaN(numericDate)) {
-                    return String(serialDate); // Return as is if not a number
-                }
-                
-                // Excel's date system: Jan 1, 1900 = 1
-                // JavaScript's date system: Jan 1, 1970
-                
-                // Adjust for Excel's leap year bug: Excel thinks 1900 was a leap year
-                const adjustedDate = numericDate > 60 ? numericDate - 1 : numericDate;
-                
-                // Calculate date
-                const millisecondsPerDay = 24 * 60 * 60 * 1000;
-                const baseDate = new Date(1900, 0, 1); // Jan 1, 1900
-                const daysSinceBaseDate = adjustedDate - 1; // Excel dates are 1-based
-                const targetDate = new Date(baseDate.getTime() + daysSinceBaseDate * millisecondsPerDay);
-                
-                // Format as MM/DD/YYYY
-                const month = targetDate.getMonth() + 1;
-                const day = targetDate.getDate();
-                const year = targetDate.getFullYear();
-                
-                return `${month}/${day}/${year}`;
-            } catch (e) {
-                console.error("Error formatting date:", e, "for value:", serialDate);
-                return String(serialDate); // Return original value if parsing fails
-            }
-        };
-        
-        function MileageProcessor() {
-            const [files, setFiles] = React.useState([]);
-            const [employees, setEmployees] = React.useState([]);
-            const [loading, setLoading] = React.useState(false);
-            const [error, setError] = React.useState(null);
-            const [mostCommonRate, setMostCommonRate] = React.useState(null);
-            const [expandedEmployee, setExpandedEmployee] = React.useState(null);
-            const [processingComplete, setProcessingComplete] = React.useState(false);
-            const [isDragging, setIsDragging] = React.useState(false);
-            
-            // Handle file drop
-            const handleDrop = (e) => {
-                e.preventDefault();
-                setError(null);
-                setIsDragging(false);
-                
-                const items = e.dataTransfer.items;
-                const droppedFiles = [];
-                let pendingFiles = 0;
-                
-                // Process all dropped items (files and folders)
-                const processEntry = async (entry) => {
-                    if (entry.isFile) {
-                        if (entry.name.endsWith('.xlsx') || entry.name.endsWith('.xls')) {
-                            pendingFiles++;
-                            entry.file(file => {
-                                droppedFiles.push(file);
-                                pendingFiles--;
-                                
-                                // When all files are processed
-                                if (pendingFiles === 0 && droppedFiles.length > 0) {
-                                    setFiles(droppedFiles);
-                                }
-                            });
-                        }
-                    } else if (entry.isDirectory) {
-                        pendingFiles++;
-                        const dirReader = entry.createReader();
-                        dirReader.readEntries(entries => {
-                            entries.forEach(subEntry => processEntry(subEntry));
-                            pendingFiles--;
-                        });
-                    }
-                };
-                
-                // If webkitGetAsEntry is available (Chrome, Edge)
-                if (items && items[0]?.webkitGetAsEntry) {
-                    for (let i = 0; i < items.length; i++) {
-                        const entry = items[i].webkitGetAsEntry();
-                        if (entry) {
-                            processEntry(entry);
-                        }
-                    }
-                } else {
-                    // Fallback to regular files
-                    const files = e.dataTransfer.files;
-                    if (files.length > 0) {
-                        const validFiles = Array.from(files).filter(
-                            file => file.name.endsWith('.xlsx') || file.name.endsWith('.xls')
-                        );
-                        
-                        if (validFiles.length > 0) {
-                            setFiles(validFiles);
-                        } else {
-                            setError("No Excel files found. Please upload .xlsx or .xls files.");
-                        }
-                    }
-                }
-            };
-            
-            // Handle file selection via input
-            const handleFileSelect = (e) => {
-                setError(null);
-                
-                const selectedFiles = e.target.files;
-                if (selectedFiles.length > 0) {
-                    const validFiles = Array.from(selectedFiles).filter(
-                        file => file.name.endsWith('.xlsx') || file.name.endsWith('.xls')
-                    );
-                    
-                    if (validFiles.length > 0) {
-                        setFiles(validFiles);
-                    } else {
-                        setError("No Excel files found. Please select .xlsx or .xls files.");
-                    }
-                }
-            };
-            
-            // Process files
-            const processFiles = async () => {
-                if (files.length === 0) return;
-                
-                setLoading(true);
-                setError(null);
-                setProcessingComplete(false);
-                setEmployees([]);
-                
-                try {
-                    const processedEmployees = [];
-                    const ratesCount = {};
-                    
-                    for (const file of files) {
-                        try {
-                            const arrayBuffer = await file.arrayBuffer();
-                            const workbook = XLSX.read(arrayBuffer, {
-                                type: 'array',
-                                cellDates: false // Don't auto-convert dates, we'll handle formatting
-                            });
-                            
-                            const firstSheetName = workbook.SheetNames[0];
-                            const worksheet = workbook.Sheets[firstSheetName];
-                            
-                            // Get employee data
-                            const employeeName = worksheet['B2']?.v || 'Unknown';
-                            const totalMiles = parseFloat(worksheet['B3']?.v) || 0;
-                            const irsRate = parseFloat(worksheet['B4']?.v) || 0;
-                            const reportedReimbursement = parseFloat(worksheet['B5']?.v) || 0;
-                            
-                            // Count IRS rates for consensus
-                            ratesCount[irsRate] = (ratesCount[irsRate] || 0) + 1;
-                            
-                            // Get individual entries
-                            const entries = [];
-                            let rowIndex = 7;
-                            let entryTotalMiles = 0;
-                            
-                            while (worksheet[`A${rowIndex}`]) {
-                                const date = worksheet[`A${rowIndex}`]?.v || '';
-                                const purpose = worksheet[`B${rowIndex}`]?.v || '';
-                                const description = worksheet[`C${rowIndex}`]?.v || '';
-                                const miles = parseFloat(worksheet[`D${rowIndex}`]?.v) || 0;
-                                
-                                entries.push({
-                                    date,
-                                    purpose,
-                                    description,
-                                    miles
-                                });
-                                
-                                entryTotalMiles += miles;
-                                rowIndex++;
-                            }
-                            
-                            // Validate miles match
-                            const milesMatch = Math.abs(totalMiles - entryTotalMiles) < 0.01;
-                            
-                            processedEmployees.push({
-                                name: employeeName,
-                                fileName: file.name,
-                                totalMiles,
-                                irsRate,
-                                reportedReimbursement,
-                                calculatedReimbursement: entryTotalMiles * irsRate,
-                                entries,
-                                milesMatch,
-                                entryTotalMiles
-                            });
-                        } catch (err) {
-                            console.error(`Error processing file ${file.name}:`, err);
-                            setError(`Error processing file "${file.name}". Please ensure it has the expected format.`);
-                        }
-                    }
-                    
-                    if (processedEmployees.length === 0) {
-                        setError("No valid data could be extracted from the files. Please check the file format.");
-                        setLoading(false);
-                        return;
-                    }
-                    
-                    // Find most common IRS rate
-                    let maxCount = 0;
-                    let consensusRate = 0;
-                    
-                    Object.entries(ratesCount).forEach(([rate, count]) => {
-                        if (count > maxCount) {
-                            maxCount = count;
-                            consensusRate = parseFloat(rate);
-                        }
-                    });
-                    
-                    setMostCommonRate(consensusRate);
-                    
-                    // Apply consensus rate
-                    const finalEmployees = processedEmployees.map(employee => ({
-                        ...employee,
-                        consensusRate,
-                        consensusReimbursement: employee.entryTotalMiles * consensusRate
-                    }));
-                    
-                    setEmployees(finalEmployees);
-                    setProcessingComplete(true);
-                } catch (err) {
-                    console.error("Processing error:", err);
-                    setError("Error processing files. Please make sure all files are valid Excel spreadsheets.");
-                } finally {
-                    setLoading(false);
-                }
-            };
-            
-            // Toggle expanded employee view
-            const toggleEmployeeExpand = (index) => {
-                if (expandedEmployee === index) {
-                    setExpandedEmployee(null);
-                } else {
-                    setExpandedEmployee(index);
-                }
-            };
-            
-            // Export data to Excel
-            const exportToExcel = () => {
-                // Create worksheet data
-                const exportData = employees.map(employee => ({
-                    'Employee Name': employee.name,
-                    'Total Miles': employee.entryTotalMiles,
-                    'Reimbursement': employee.consensusReimbursement
-                }));
-                
-                // Create workbook and worksheet
-                const wb = XLSX.utils.book_new();
-                const ws = XLSX.utils.json_to_sheet(exportData);
-                
-                // Add IRS rate at the top of the worksheet
-                XLSX.utils.sheet_add_aoa(ws, [
-                    ["IRS Mileage Rate:", mostCommonRate.toFixed(3)],
-                    [""],  // Empty row for spacing
-                    ["Mileage Reimbursement Summary"]
-                ], { origin: "A1" });
-                
-                // Apply some styling
-                ws['!cols'] = [
-                    { wch: 25 },  // Width of Employee Name column
-                    { wch: 15 },  // Width of Total Miles column
-                    { wch: 15 }   // Width of Reimbursement column
-                ];
-                
-                // Add the worksheet to the workbook
-                XLSX.utils.book_append_sheet(wb, ws, "Mileage Reimbursements");
-                
-                // Generate a filename with current date
-                const date = new Date();
-                const month = String(date.getMonth() + 1).padStart(2, '0');
-                const year = date.getFullYear();
-                const filename = `TW_Frierson_Mileage_${month}_${year}.xlsx`;
-                
-                // Write the file and trigger download
-                XLSX.writeFile(wb, filename);
-            };
-            
-            return (
-                <div>
-                    {/* Header */}
-                    <header>
-                        <div className="container">
-                            <div className="header-content">
-                                <div className="logo-container">
-                                    <div className="logo-icon">
-                                        <HelmetIcon color="#333333" />
-                                    </div>
-                                    <h1 className="company-name">T.W. FRIERSON</h1>
-                                </div>
-                                <div className="company-title">CONTRACTOR, INC.</div>
-                            </div>
-                        </div>
-                    </header>
-                    
-                    <main>
-                        <div className="container">
-                            <h2>Mileage Reimbursement Processor</h2>
-                            
-                            <p className="intro-text">
-                                Streamline your monthly mileage reimbursement process. Drop a folder containing employee 
-                                mileage spreadsheets or select individual files to process. The app will validate the data, 
-                                apply the correct IRS rate, and generate a summary report.
-                            </p>
-                            
-                            {/* Company Core Values */}
-                            <div className="core-values">
-                                <div className="core-value">
-                                    <h4>No Surprises</h4>
-                                    <p>We value transparency and clarity in all processes, ensuring every step is predictable.</p>
-                                </div>
-                                <div className="core-value">
-                                    <h4>Sense of Urgency</h4>
-                                    <p>We recognize the importance of timely action and efficient processes.</p>
-                                </div>
-                                <div className="core-value">
-                                    <h4>Fast Decisions</h4>
-                                    <p>We streamline decision-making to keep projects and processes moving forward.</p>
-                                </div>
-                            </div>
-                            
-                            {/* File Drop Zone */}
-                            <div 
-                                className={`dropzone ${isDragging ? 'active' : ''} ${files.length > 0 ? 'has-files' : ''}`}
-                                onDrop={handleDrop}
-                                onDragOver={(e) => {
-                                    e.preventDefault();
-                                    setIsDragging(true);
-                                }}
-                                onDragEnter={(e) => {
-                                    e.preventDefault();
-                                    setIsDragging(true);
-                                }}
-                                onDragLeave={(e) => {
-                                    e.preventDefault();
-                                    setIsDragging(false);
-                                }}
-                            >
-                                <div className="icon-container">
-                                    <FileIcon size={50} color={files.length > 0 ? "#27ae60" : "#30526E"} />
-                                </div>
-                                
-                                {files.length > 0 ? (
-                                    <div className="files-selected">
-                                        {files.length} file{files.length !== 1 ? 's' : ''} selected
-                                    </div>
-                                ) : (
-                                    <div className="dropzone-instructions">
-                                        <p><strong>Drag & drop</strong> a folder or Excel files here</p>
-                                        <p>- OR -</p>
-                                    </div>
-                                )}
-                                
-                                <div className="button-group">
-                                    <label className="btn btn-primary">
-                                        Select Files
-                                        <input 
-                                            type="file" 
-                                            multiple 
-                                            onChange={handleFileSelect} 
-                                            className="file-input" 
-                                            accept=".xlsx,.xls"
-                                        />
-                                    </label>
-                                    
-                                    {files.length > 0 && (
-                                        <button 
-                                            className="btn btn-secondary" 
-                                            onClick={processFiles}
-                                            disabled={loading}
-                                        >
-                                            {loading ? 'Processing...' : 'Process Files'}
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
-                            
-                            {/* Error Message */}
-                            {error && (
-                                <div className="error-container">
-                                    <AlertIcon size={24} className="error-icon" />
-                                    <p>{error}</p>
-                                </div>
-                            )}
-                            
-                            {/* Results */}
-                            {processingComplete && employees.length > 0 && (
-                                <div className="results-container">
-                                    <div className="results-header">
-                                        <div>
-                                            <h3 className="results-title">Mileage Summary</h3>
-                                            <p className="results-subtitle">
-                                                Consensus IRS rate: ${mostCommonRate.toFixed(3)} per mile
-                                            </p>
-                                        </div>
-                                        <button 
-                                            className="btn btn-primary"
-                                            onClick={exportToExcel}
-                                        >
-                                            <DownloadIcon size={18} style={{marginRight: '8px'}} />
-                                            Export to Excel
-                                        </button>
-                                    </div>
-                                    
-                                    <div className="table-responsive">
-                                        <table>
-                                            <thead>
-                                                <tr>
-                                                    <th>Employee</th>
-                                                    <th>Total Miles</th>
-                                                    <th>Reimbursement</th>
-                                                    <th>Status</th>
-                                                    <th>Details</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {employees.map((employee, index) => (
-                                                    <React.Fragment key={index}>
-                                                        <tr>
-                                                            <td>
-                                                                <div className="employee-name">{employee.name}</div>
-                                                                <div className="file-name">{employee.fileName}</div>
-                                                            </td>
-                                                            <td>
-                                                                {employee.entryTotalMiles.toFixed(1)}
-                                                                {!employee.milesMatch && (
-                                                                    <div className="error-text">
-                                                                        (Reported: {employee.totalMiles.toFixed(1)})
-                                                                    </div>
-                                                                )}
-                                                            </td>
-                                                            <td>
-                                                                ${employee.consensusReimbursement.toFixed(2)}
-                                                                {Math.abs(employee.consensusReimbursement - employee.reportedReimbursement) > 0.01 && (
-                                                                    <div className="error-text">
-                                                                        (Reported: ${employee.reportedReimbursement.toFixed(2)})
-                                                                    </div>
-                                                                )}
-                                                                <div className="file-name">
-                                                                    Rate: ${employee.consensusRate.toFixed(3)}
-                                                                    {employee.irsRate !== employee.consensusRate && (
-                                                                        <span className="error-text">
-                                                                            (Reported: ${employee.irsRate.toFixed(3)})
-                                                                        </span>
-                                                                    )}
-                                                                </div>
-                                                            </td>
-                                                            <td>
-                                                                {employee.milesMatch && Math.abs(employee.consensusReimbursement - employee.reportedReimbursement) <= 0.01 ? (
-                                                                    <span className="badge badge-valid">
-                                                                        <CheckIcon size={14} className="icon-sm" /> Valid
-                                                                    </span>
-                                                                ) : (
-                                                                    <span className="badge badge-error">
-                                                                        <AlertIcon size={14} className="icon-sm" /> Discrepancy
-                                                                    </span>
-                                                                )}
-                                                            </td>
-                                                            <td>
-                                                                <button 
-                                                                    className="view-toggle"
-                                                                    onClick={() => toggleEmployeeExpand(index)}
-                                                                >
-                                                                    {expandedEmployee === index ? 'Hide' : 'View'}
-                                                                    {expandedEmployee === index ? (
-                                                                        <ChevronUpIcon size={16} className="toggle-icon" />
-                                                                    ) : (
-                                                                        <ChevronDownIcon size={16} className="toggle-icon" />
-                                                                    )}
-                                                                </button>
-                                                            </td>
-                                                        </tr>
-                                                        
-                                                        {/* Expanded trip details */}
-                                                        {expandedEmployee === index && (
-                                                            <tr className="details-row">
-                                                                <td colSpan="5" className="details-content">
-                                                                    <h4 className="details-title">
-                                                                        <FileIcon size={18} style={{marginRight: '8px'}} />
-                                                                        Trip Details
-                                                                    </h4>
-                                                                    <div className="table-responsive">
-                                                                        <table className="details-table">
-                                                                            <thead>
-                                                                                <tr>
-                                                                                    <th>Date</th>
-                                                                                    <th>Purpose</th>
-                                                                                    <th>Description</th>
-                                                                                    <th>Miles</th>
-                                                                                </tr>
-                                                                            </thead>
-                                                                            <tbody>
-                                                                                {employee.entries.map((entry, entryIndex) => (
-                                                                                    <tr key={entryIndex}>
-                                                                                        <td>{formatExcelDate(entry.date)}</td>
-                                                                                        <td>{entry.purpose}</td>
-                                                                                        <td>{entry.description}</td>
-                                                                                        <td>{entry.miles.toFixed(1)}</td>
-                                                                                    </tr>
-                                                                                ))}
-                                                                                <tr className="total-row">
-                                                                                    <td colSpan="3" style={{textAlign: 'right'}}>
-                                                                                        Total:
-                                                                                    </td>
-                                                                                    <td>
-                                                                                        {employee.entryTotalMiles.toFixed(1)}
-                                                                                    </td>
-                                                                                </tr>
-                                                                            </tbody>
-                                                                        </table>
-                                                                    </div>
-                                                                </td>
-                                                            </tr>
-                                                        )}
-                                                    </React.Fragment>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                    </main>
-                    
-                    {/* Footer */}
-                    <footer>
-                        <div className="container">
-                            <div className="footer-content">
-                                <div className="footer-logo">
-                                    <div className="footer-icon">
-                                        <HelmetIcon size={18} color="#333333" />
-                                    </div>
-                                    <div className="footer-name">T.W. FRIERSON CONTRACTOR, INC.</div>
-                                </div>
-                                <div className="footer-message">Build with Purpose</div>
-                            </div>
-                        </div>
-                    </footer>
-                    
-                    {/* Loading Overlay */}
-                    {loading && (
-                        <div className="loading-overlay">
-                            <div>
-                                <div className="loading-spinner"></div>
-                                <div className="loading-text">Processing files...</div>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            );
+    <div class="security-notice">
+      <h3>No Surprises</h3>
+      <p>This tool operates entirely within your browser. No files are uploaded to external servers, making it safe for confidential company documents and images. Your data never leaves your device.</p>
+    </div>
+  </div>
+  
+  <script type="text/babel">
+    // Make the toggle function available in global scope
+    window.toggleTraining = function() {
+      const content = document.getElementById('training-content');
+      const arrow = document.getElementById('training-arrow');
+      if (content && arrow) {
+        content.classList.toggle('show');
+        arrow.textContent = content.classList.contains('show') ? '▲' : '▼';
+      }
+    };
+    
+    // Icon Components
+    const FileIcon = ({size = 24, color = "currentColor"}) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+        <polyline points="14 2 14 8 20 8"></polyline>
+        <line x1="16" y1="13" x2="8" y2="13"></line>
+        <line x1="16" y1="17" x2="8" y2="17"></line>
+        <polyline points="10 9 9 9 8 9"></polyline>
+      </svg>
+    );
+    
+    const CheckIcon = ({size = 24, color = "currentColor"}) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+    );
+    
+    const AlertIcon = ({size = 24, color = "currentColor"}) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+    );
+    
+    const ChevronDownIcon = ({size = 24, color = "currentColor"}) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
+    );
+    
+    const ChevronUpIcon = ({size = 24, color = "currentColor"}) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <polyline points="18 15 12 9 6 15"></polyline>
+      </svg>
+    );
+    
+    const DownloadIcon = ({size = 24, color = "currentColor"}) => (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+        <polyline points="7 10 12 15 17 10"></polyline>
+        <line x1="12" y1="15" x2="12" y2="3"></line>
+      </svg>
+    );
+    
+    // Helper function to format Excel serial date
+    const formatExcelDate = (serialDate) => {
+      if (!serialDate) return '';
+      
+      try {
+        // Check if it's already a formatted date string
+        if (typeof serialDate === 'string' && 
+            (serialDate.includes('/') || serialDate.includes('-'))) {
+          return serialDate;
         }
         
-        // Render the app
-        ReactDOM.render(<MileageProcessor />, document.getElementById('app'));
-    </script>
+        // Try to parse the date as a number
+        const numericDate = parseFloat(serialDate);
+        if (isNaN(numericDate)) {
+          return String(serialDate); // Return as is if not a number
+        }
+        
+        // Excel's date system: Jan 1, 1900 = 1
+        // Adjust for Excel's leap year bug: Excel thinks 1900 was a leap year
+        const adjustedDate = numericDate > 60 ? numericDate - 1 : numericDate;
+        
+        // Calculate date
+        const millisecondsPerDay = 24 * 60 * 60 * 1000;
+        const baseDate = new Date(1900, 0, 1); // Jan 1, 1900
+        const daysSinceBaseDate = adjustedDate - 1; // Excel dates are 1-based
+        const targetDate = new Date(baseDate.getTime() + daysSinceBaseDate * millisecondsPerDay);
+        
+        // Format as MM/DD/YYYY
+        const month = targetDate.getMonth() + 1;
+        const day = targetDate.getDate();
+        const year = targetDate.getFullYear();
+        
+        return `${month}/${day}/${year}`;
+      } catch (e) {
+        console.error("Error formatting date:", e, "for value:", serialDate);
+        return String(serialDate); // Return original value if parsing fails
+      }
+    };
+    
+    function MileageProcessor() {
+      const [files, setFiles] = React.useState([]);
+      const [employees, setEmployees] = React.useState([]);
+      const [loading, setLoading] = React.useState(false);
+      const [error, setError] = React.useState(null);
+      const [mostCommonRate, setMostCommonRate] = React.useState(null);
+      const [expandedEmployee, setExpandedEmployee] = React.useState(null);
+      const [processingComplete, setProcessingComplete] = React.useState(false);
+      const [isDragging, setIsDragging] = React.useState(false);
+      
+      // Handle file drop
+      const handleDrop = (e) => {
+        e.preventDefault();
+        setError(null);
+        setIsDragging(false);
+        
+        const items = e.dataTransfer.items;
+        const droppedFiles = [];
+        let pendingFiles = 0;
+        
+        // Process all dropped items (files and folders)
+        const processEntry = async (entry) => {
+          if (entry.isFile) {
+            if (entry.name.endsWith('.xlsx') || entry.name.endsWith('.xls')) {
+              pendingFiles++;
+              entry.file(file => {
+                droppedFiles.push(file);
+                pendingFiles--;
+                
+                // When all files are processed
+                if (pendingFiles === 0 && droppedFiles.length > 0) {
+                  setFiles(droppedFiles);
+                }
+              });
+            }
+          } else if (entry.isDirectory) {
+            pendingFiles++;
+            const dirReader = entry.createReader();
+            dirReader.readEntries(entries => {
+              entries.forEach(subEntry => processEntry(subEntry));
+              pendingFiles--;
+            });
+          }
+        };
+        
+        // If webkitGetAsEntry is available (Chrome, Edge)
+        if (items && items[0]?.webkitGetAsEntry) {
+          for (let i = 0; i < items.length; i++) {
+            const entry = items[i].webkitGetAsEntry();
+            if (entry) {
+              processEntry(entry);
+            }
+          }
+        } else {
+          // Fallback to regular files
+          const files = e.dataTransfer.files;
+          if (files.length > 0) {
+            const validFiles = Array.from(files).filter(
+              file => file.name.endsWith('.xlsx') || file.name.endsWith('.xls')
+            );
+            
+            if (validFiles.length > 0) {
+              setFiles(validFiles);
+            } else {
+              setError("No Excel files found. Please upload .xlsx or .xls files.");
+            }
+          }
+        }
+      };
+      
+      // Handle file selection via input
+      const handleFileSelect = (e) => {
+        setError(null);
+        
+        const selectedFiles = e.target.files;
+        if (selectedFiles.length > 0) {
+          const validFiles = Array.from(selectedFiles).filter(
+            file => file.name.endsWith('.xlsx') || file.name.endsWith('.xls')
+          );
+          
+          if (validFiles.length > 0) {
+            setFiles(validFiles);
+          } else {
+            setError("No Excel files found. Please select .xlsx or .xls files.");
+          }
+        }
+      };
+      
+      // Handle folder selection
+      const handleFolderSelect = (e) => {
+        setError(null);
+        
+        const selectedFiles = e.target.files;
+        if (selectedFiles.length > 0) {
+          const validFiles = Array.from(selectedFiles).filter(
+            file => file.name.endsWith('.xlsx') || file.name.endsWith('.xls')
+          );
+          
+          if (validFiles.length > 0) {
+            setFiles(validFiles);
+          } else {
+            setError("No Excel files found in the selected folder.");
+          }
+        }
+      };
+      
+      // Process files
+      const processFiles = async () => {
+        if (files.length === 0) return;
+        
+        setLoading(true);
+        setError(null);
+        setProcessingComplete(false);
+        setEmployees([]);
+        
+        try {
+          const processedEmployees = [];
+          const ratesCount = {};
+          
+          for (const file of files) {
+            try {
+              const arrayBuffer = await file.arrayBuffer();
+              const workbook = XLSX.read(arrayBuffer, {
+                type: 'array',
+                cellDates: false
+              });
+              
+              const firstSheetName = workbook.SheetNames[0];
+              const worksheet = workbook.Sheets[firstSheetName];
+              
+              // Get employee data
+              const employeeName = worksheet['B2']?.v || 'Unknown';
+              const totalMiles = parseFloat(worksheet['B3']?.v) || 0;
+              const irsRate = parseFloat(worksheet['B4']?.v) || 0;
+              const reportedReimbursement = parseFloat(worksheet['B5']?.v) || 0;
+              
+              // Count IRS rates for consensus
+              ratesCount[irsRate] = (ratesCount[irsRate] || 0) + 1;
+              
+              // Get individual entries
+              const entries = [];
+              let rowIndex = 7;
+              let entryTotalMiles = 0;
+              
+              while (worksheet[`A${rowIndex}`]) {
+                const date = worksheet[`A${rowIndex}`]?.v || '';
+                const purpose = worksheet[`B${rowIndex}`]?.v || '';
+                const description = worksheet[`C${rowIndex}`]?.v || '';
+                const miles = parseFloat(worksheet[`D${rowIndex}`]?.v) || 0;
+                
+                entries.push({
+                  date,
+                  purpose,
+                  description,
+                  miles
+                });
+                
+                entryTotalMiles += miles;
+                rowIndex++;
+              }
+              
+              // Validate miles match
+              const milesMatch = Math.abs(totalMiles - entryTotalMiles) < 0.01;
+              
+              processedEmployees.push({
+                name: employeeName,
+                fileName: file.name,
+                totalMiles,
+                irsRate,
+                reportedReimbursement,
+                calculatedReimbursement: entryTotalMiles * irsRate,
+                entries,
+                milesMatch,
+                entryTotalMiles
+              });
+            } catch (err) {
+              console.error(`Error processing file ${file.name}:`, err);
+              setError(`Error processing file "${file.name}". Please ensure it has the expected format.`);
+            }
+          }
+          
+          if (processedEmployees.length === 0) {
+            setError("No valid data could be extracted from the files. Please check the file format.");
+            setLoading(false);
+            return;
+          }
+          
+          // Find most common IRS rate
+          let maxCount = 0;
+          let consensusRate = 0;
+          
+          Object.entries(ratesCount).forEach(([rate, count]) => {
+            if (count > maxCount) {
+              maxCount = count;
+              consensusRate = parseFloat(rate);
+            }
+          });
+          
+          setMostCommonRate(consensusRate);
+          
+          // Apply consensus rate
+          const finalEmployees = processedEmployees.map(employee => ({
+            ...employee,
+            consensusRate,
+            consensusReimbursement: employee.entryTotalMiles * consensusRate
+          }));
+          
+          setEmployees(finalEmployees);
+          setProcessingComplete(true);
+        } catch (err) {
+          console.error("Processing error:", err);
+          setError("Error processing files. Please make sure all files are valid Excel spreadsheets.");
+        } finally {
+          setLoading(false);
+        }
+      };
+      
+      // Toggle expanded employee view
+      const toggleEmployeeExpand = (index) => {
+        if (expandedEmployee === index) {
+          setExpandedEmployee(null);
+        } else {
+          setExpandedEmployee(index);
+        }
+      };
+      
+      // Export data to Excel
+      const exportToExcel = () => {
+        // Create worksheet data
+        const exportData = employees.map(employee => ({
+          'Employee Name': employee.name,
+          'Total Miles': employee.entryTotalMiles,
+          'Reimbursement': employee.consensusReimbursement
+        }));
+        
+        // Create workbook and worksheet
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.json_to_sheet(exportData);
+        
+        // Add IRS rate at the top of the worksheet
+        XLSX.utils.sheet_add_aoa(ws, [
+          ["IRS Mileage Rate:", mostCommonRate.toFixed(3)],
+          [""],  // Empty row for spacing
+          ["Mileage Reimbursement Summary"]
+        ], { origin: "A1" });
+        
+        // Apply some styling
+        ws['!cols'] = [
+          { wch: 25 },  // Width of Employee Name column
+          { wch: 15 },  // Width of Total Miles column
+          { wch: 15 }   // Width of Reimbursement column
+        ];
+        
+        // Add the worksheet to the workbook
+        XLSX.utils.book_append_sheet(wb, ws, "Mileage Reimbursements");
+        
+        // Generate a filename with current date
+        const date = new Date();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        const filename = `TW_Frierson_Mileage_${month}_${year}.xlsx`;
+        
+        // Write the file and trigger download
+        XLSX.writeFile(wb, filename);
+      };
+      
+      return (
+        <div>
+          <div 
+            className="drop-area"
+            onDrop={handleDrop}
+            onDragOver={(e) => {
+              e.preventDefault();
+              setIsDragging(true);
+            }}
+            onDragEnter={(e) => {
+              e.preventDefault();
+              setIsDragging(true);
+            }}
+            onDragLeave={(e) => {
+              e.preventDefault();
+              setIsDragging(false);
+            }}
+          >
+            <p>Drag & drop Excel files or a folder containing Excel files here</p>
+            <div className="button-group">
+              <input 
+                type="file" 
+                id="file-input" 
+                className="file-input" 
+                multiple 
+                onChange={handleFileSelect}
+                accept=".xlsx,.xls" 
+              />
+              <input 
+                type="file" 
+                id="folder-input" 
+                className="file-input" 
+                webkitdirectory="true" 
+                directory="true" 
+                multiple 
+                onChange={handleFolderSelect} 
+              />
+              <button 
+                className="upload-button" 
+                onClick={() => document.getElementById('file-input').click()}
+              >
+                SELECT FILES
+              </button>
+              <button 
+                className="upload-button" 
+                onClick={() => document.getElementById('folder-input').click()}
+              >
+                SELECT FOLDER
+              </button>
+            </div>
+          </div>
+          
+          {files.length > 0 && (
+            <div className="file-list">
+              <p>{files.length} file(s) selected:</p>
+              {files.map((file, index) => (
+                <div key={index} style={{marginTop: '8px'}}>
+                  {file.name}
+                </div>
+              ))}
+            </div>
+          )}
+          
+          <button 
+            className="convert-button" 
+            onClick={processFiles} 
+            disabled={files.length === 0 || loading}
+          >
+            PROCESS FILES
+          </button>
+          
+          {/* Error Message */}
+          {error && (
+            <div className="error-container">
+              <AlertIcon size={20} className="error-icon" color={`var(--brick)`} />
+              <p>{error}</p>
+            </div>
+          )}
+          
+          {/* Results */}
+          {processingComplete && employees.length > 0 && (
+            <div className="results-container">
+              <div className="results-header">
+                <div>
+                  <h3 className="results-title">Mileage Summary</h3>
+                  <p className="results-subtitle">
+                    Consensus IRS rate: ${mostCommonRate.toFixed(3)} per mile
+                  </p>
+                </div>
+                <button 
+                  className="upload-button"
+                  onClick={exportToExcel}
+                  style={{marginBottom: 0}}
+                >
+                  <DownloadIcon size={16} style={{marginRight: '8px'}} />
+                  EXPORT TO EXCEL
+                </button>
+              </div>
+              
+              <div className="table-responsive">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Employee</th>
+                      <th>Total Miles</th>
+                      <th>Reimbursement</th>
+                      <th>Status</th>
+                      <th>Details</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {employees.map((employee, index) => (
+                      <React.Fragment key={index}>
+                        <tr>
+                          <td>
+                            <div className="employee-name">{employee.name}</div>
+                            <div className="file-name">{employee.fileName}</div>
+                          </td>
+                          <td>
+                            {employee.entryTotalMiles.toFixed(1)}
+                            {!employee.milesMatch && (
+                              <div className="error-text">
+                                (Reported: {employee.totalMiles.toFixed(1)})
+                              </div>
+                            )}
+                          </td>
+                          <td>
+                            ${employee.consensusReimbursement.toFixed(2)}
+                            {Math.abs(employee.consensusReimbursement - employee.reportedReimbursement) > 0.01 && (
+                              <div className="error-text">
+                                (Reported: ${employee.reportedReimbursement.toFixed(2)})
+                              </div>
+                            )}
+                            <div className="file-name">
+                              Rate: ${employee.consensusRate.toFixed(3)}
+                              {employee.irsRate !== employee.consensusRate && (
+                                <span className="error-text">
+                                  (Reported: ${employee.irsRate.toFixed(3)})
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                          <td>
+                            {employee.milesMatch && Math.abs(employee.consensusReimbursement - employee.reportedReimbursement) <= 0.01 ? (
+                              <span className="badge badge-valid">
+                                <CheckIcon size={12} style={{marginRight: '5px'}} /> Valid
+                              </span>
+                            ) : (
+                              <span className="badge badge-error">
+                                <AlertIcon size={12} style={{marginRight: '5px'}} /> Discrepancy
+                              </span>
+                            )}
+                          </td>
+                          <td>
+                            <button 
+                              className="view-toggle"
+                              onClick={() => toggleEmployeeExpand(index)}
+                            >
+                              {expandedEmployee === index ? 'Hide' : 'View'}
+                              {expandedEmployee === index ? (
+                                <ChevronUpIcon size={14} className="toggle-icon" />
+                              ) : (
+                                <ChevronDownIcon size={14} className="toggle-icon" />
+                              )}
+                            </button>
+                          </td>
+                        </tr>
+                        
+                        {/* Expanded trip details */}
+                        {expandedEmployee === index && (
+                          <tr className="details-row">
+                            <td colSpan="5" className="details-content">
+                              <h4 className="details-title">
+                                Trip Details
+                              </h4>
+                              <div className="table-responsive">
+                                <table className="details-table">
+                                  <thead>
+                                    <tr>
+                                      <th>Date</th>
+                                      <th>Purpose</th>
+                                      <th>Description</th>
+                                      <th>Miles</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {employee.entries.map((entry, entryIndex) => (
+                                      <tr key={entryIndex}>
+                                        <td>{formatExcelDate(entry.date)}</td>
+                                        <td>{entry.purpose}</td>
+                                        <td>{entry.description}</td>
+                                        <td>{entry.miles.toFixed(1)}</td>
+                                      </tr>
+                                    ))}
+                                    <tr className="total-row">
+                                      <td colSpan="3" style={{textAlign: 'right'}}>
+                                        Total:
+                                      </td>
+                                      <td>
+                                        {employee.entryTotalMiles.toFixed(1)}
+                                      </td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </React.Fragment>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+          
+          {/* Loading Overlay */}
+          {loading && (
+            <div className="loading-overlay">
+              <div>
+                <div className="loading-spinner"></div>
+                <div className="loading-text">Processing files...</div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+    
+    // Render the app
+    ReactDOM.render(<MileageProcessor />, document.getElementById('app'));
+  </script>
 </body>
 </html>
