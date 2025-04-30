@@ -671,7 +671,24 @@
         return String(serialDate); // Return original value if parsing fails
       }
     };
-    
+    // Helper function to check if a file is a valid Excel file
+const isValidExcelFile = (file) => {
+  // Check if it's a hidden or temporary file (starts with .)
+  if (file.name.startsWith('.')) {
+    return false;
+  }
+  
+  // Check if it's a temporary Office file (starts with ~$)
+  if (file.name.startsWith('~$')) {
+    return false;
+  }
+  
+  // Check if it has a valid Excel extension
+  const validExtensions = ['.xlsx', '.xls', '.xlsm', '.xlsb'];
+  const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+  
+  return validExtensions.includes(fileExtension);
+};
     function MileageProcessor() {
       const [files, setFiles] = React.useState([]);
       const [employees, setEmployees] = React.useState([]);
@@ -706,11 +723,11 @@ const handleDrop = (e) => {
           // Process single file
           promises.push(new Promise(resolve => {
             entry.file(file => {
-              if (file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
-                resolve([file]);
-              } else {
-                resolve([]);
-              }
+if (isValidExcelFile(file)) {
+  resolve([file]);
+} else {
+  resolve([]);
+}
             });
           }));
         }
@@ -730,9 +747,7 @@ const handleDrop = (e) => {
     // Fallback for browsers not supporting DataTransferItemList
     const droppedFiles = e.dataTransfer.files;
     if (droppedFiles && droppedFiles.length > 0) {
-      const validFiles = Array.from(droppedFiles).filter(
-        file => file.name.endsWith('.xlsx') || file.name.endsWith('.xls')
-      );
+const validFiles = Array.from(droppedFiles).filter(isValidExcelFile);
       
       if (validFiles.length > 0) {
         setFiles(validFiles);
@@ -787,9 +802,7 @@ const getAllFilesFromEntry = (entry) => {
         
         const selectedFiles = e.target.files;
         if (selectedFiles.length > 0) {
-          const validFiles = Array.from(selectedFiles).filter(
-            file => file.name.endsWith('.xlsx') || file.name.endsWith('.xls')
-          );
+const validFiles = Array.from(selectedFiles).filter(isValidExcelFile);
           
           if (validFiles.length > 0) {
             setFiles(validFiles);
