@@ -671,23 +671,33 @@
         return String(serialDate); // Return original value if parsing fails
       }
     };
-    // Helper function to check if a file is a valid Excel file
+// Helper function to check if a file is a valid Excel file
 const isValidExcelFile = (file) => {
-  // Check if it's a hidden or temporary file (starts with .)
-  if (file.name.startsWith('.')) {
+  const fileName = file.name;
+  
+  // Check if it's a hidden file (starts with .)
+  if (fileName.startsWith('.')) {
+    console.log(`Filtering out hidden file: ${fileName}`);
     return false;
   }
   
   // Check if it's a temporary Office file (starts with ~$)
-  if (file.name.startsWith('~$')) {
+  if (fileName.startsWith('~$')) {
+    console.log(`Filtering out temporary Office file: ${fileName}`);
     return false;
   }
   
   // Check if it has a valid Excel extension
   const validExtensions = ['.xlsx', '.xls', '.xlsm', '.xlsb'];
-  const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+  const fileExtension = '.' + fileName.split('.').pop().toLowerCase();
   
-  return validExtensions.includes(fileExtension);
+  if (!validExtensions.includes(fileExtension)) {
+    console.log(`Filtering out non-Excel file: ${fileName}`);
+    return false;
+  }
+  
+  console.log(`Valid Excel file detected: ${fileName}`);
+  return true;
 };
     function MileageProcessor() {
       const [files, setFiles] = React.useState([]);
