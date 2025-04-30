@@ -673,30 +673,32 @@
     };
 // Helper function to check if a file is a valid Excel file
 const isValidExcelFile = (file) => {
+  // Get the filename
   const fileName = file.name;
+  
+  // Temporary Excel files typically start with ~$ or have patterns like ~WRL or similar
+  const tempFilePatterns = [/^~\$/, /^~WRL/];
+  
+  // Check against each temporary file pattern
+  for (const pattern of tempFilePatterns) {
+    if (pattern.test(fileName)) {
+      console.log(`Excluding temporary Excel file: ${fileName}`);
+      return false;
+    }
+  }
   
   // Check if it's a hidden file (starts with .)
   if (fileName.startsWith('.')) {
-    console.log(`Filtering out hidden file: ${fileName}`);
+    console.log(`Excluding hidden file: ${fileName}`);
     return false;
   }
   
-  // Check if it's a temporary Office file (starts with ~$)
-  if (fileName.startsWith('~$')) {
-    console.log(`Filtering out temporary Office file: ${fileName}`);
+  // Check file extension (case insensitive)
+  if (!(/\.(xlsx|xls|xlsm|xlsb)$/i.test(fileName))) {
+    console.log(`Excluding non-Excel file: ${fileName}`);
     return false;
   }
   
-  // Check if it has a valid Excel extension
-  const validExtensions = ['.xlsx', '.xls', '.xlsm', '.xlsb'];
-  const fileExtension = '.' + fileName.split('.').pop().toLowerCase();
-  
-  if (!validExtensions.includes(fileExtension)) {
-    console.log(`Filtering out non-Excel file: ${fileName}`);
-    return false;
-  }
-  
-  console.log(`Valid Excel file detected: ${fileName}`);
   return true;
 };
     function MileageProcessor() {
