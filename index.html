@@ -11,9 +11,6 @@
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
   
-  <!-- Google Fonts: Franklin Gothic or similar -->
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-  
   <style>
     :root {
       /* T.W. Frierson brand colors */
@@ -36,7 +33,7 @@
     }
     
     body {
-      font-family: 'Roboto', 'Franklin Gothic', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
       max-width: 850px;
       margin: 0 auto;
       padding: 30px;
@@ -527,42 +524,42 @@
 </head>
 <body>
   <h1>T.W. FRIERSON</h1>
-  <h2 class="tagline">Mileage Reimbursement Processor</h2>
+  <h2 class="tagline">MILEAGE REIMBURSEMENT PROCESSOR</h2>
   
   <div class="training-box">
     <div class="training-header" onclick="toggleTraining()">
-      <span>How to Use This Tool</span>
+      <span>HOW TO USE THIS TOOL</span>
       <span id="training-arrow">▼</span>
     </div>
     <div id="training-content" class="training-content">
-      <h4>What is this tool for?</h4>
+      <h4>WHAT IS THIS TOOL FOR?</h4>
       <p>This tool processes employee mileage spreadsheets for reimbursement. Upload Excel files containing mileage data, and the tool will validate mileage totals, apply the correct IRS reimbursement rate, and generate a summary report for payroll processing.</p>
       
-      <h4>Step-by-Step Instructions</h4>
+      <h4>STEP-BY-STEP INSTRUCTIONS</h4>
       <ol>
         <li><strong>Select your files:</strong> You have two options:
           <ul>
-            <li><strong>Select individual files:</strong> Click the "Select Files" button and choose one or more Excel files.</li>
-            <li><strong>Select an entire folder:</strong> Click the "Select Folder" button and choose a folder containing Excel files.</li>
+            <li><strong>Select individual files:</strong> Click the "SELECT FILES" button and choose one or more Excel files.</li>
+            <li><strong>Select an entire folder:</strong> Click the "SELECT FOLDER" button and choose a folder containing Excel files.</li>
           </ul>
         </li>
         <li><strong>Review your selection:</strong> You'll see a list of the files you've selected.</li>
-        <li><strong>Process files:</strong> Click the "Process Files" button. The app will analyze the data.</li>
+        <li><strong>Process files:</strong> Click the "PROCESS FILES" button. The app will analyze the data.</li>
         <li><strong>Wait for processing:</strong> A progress indicator will show while your files are being processed.</li>
-        <li><strong>Find your converted files:</strong> Review the summary table that appears with your results.</li>
-        <li><strong>Export results:</strong> Click the "Export to Excel" button to download a formatted summary spreadsheet for payroll.</li>
+        <li><strong>Review results:</strong> Review the summary table that appears with your results.</li>
+        <li><strong>Export results:</strong> Click the "EXPORT TO EXCEL" button to download a formatted summary spreadsheet for payroll.</li>
       </ol>
       
-      <h4>Tips for Success</h4>
+      <h4>TIPS FOR SUCCESS</h4>
       <div class="note">
         <p><strong>Note:</strong> If you're working with a large number of files, the processing might take a few minutes. Please be patient and don't close the browser window during processing.</p>
         <p>Each spreadsheet should have employee name in cell B2, total miles in B3, IRS rate in B4, reimbursement amount in B5, and trip entries starting from row 7.</p>
       </div>
       
-      <h4>Troubleshooting</h4>
+      <h4>TROUBLESHOOTING</h4>
       <ol>
         <li><strong>No files appear after selection:</strong> Make sure you're selecting Excel files (.xlsx or .xls).</li>
-        <li><strong>The "Process Files" button is grayed out:</strong> You need to select at least one Excel file before processing.</li>
+        <li><strong>The "PROCESS FILES" button is grayed out:</strong> You need to select at least one Excel file before processing.</li>
         <li><strong>Invalid data warnings:</strong> If you see discrepancy warnings, check that the reported totals match the sum of individual trips.</li>
       </ol>
     </div>
@@ -572,7 +569,7 @@
     <div id="app"></div>
     
     <div class="security-notice">
-      <h3>No Surprises</h3>
+      <h3>NO SURPRISES</h3>
       <p>This tool operates entirely within your browser. No files are uploaded to external servers, making it safe for confidential company documents. Your data never leaves your device.</p>
     </div>
   </div>
@@ -688,56 +685,16 @@
         setError(null);
         setIsDragging(false);
         
-        const items = e.dataTransfer.items;
-        const droppedFiles = [];
-        let pendingFiles = 0;
-        
-        // Process all dropped items (files and folders)
-        const processEntry = async (entry) => {
-          if (entry.isFile) {
-            if (entry.name.endsWith('.xlsx') || entry.name.endsWith('.xls')) {
-              pendingFiles++;
-              entry.file(file => {
-                droppedFiles.push(file);
-                pendingFiles--;
-                
-                // When all files are processed
-                if (pendingFiles === 0 && droppedFiles.length > 0) {
-                  setFiles(droppedFiles);
-                }
-              });
-            }
-          } else if (entry.isDirectory) {
-            pendingFiles++;
-            const dirReader = entry.createReader();
-            dirReader.readEntries(entries => {
-              entries.forEach(subEntry => processEntry(subEntry));
-              pendingFiles--;
-            });
-          }
-        };
-        
-        // If webkitGetAsEntry is available (Chrome, Edge)
-        if (items && items[0]?.webkitGetAsEntry) {
-          for (let i = 0; i < items.length; i++) {
-            const entry = items[i].webkitGetAsEntry();
-            if (entry) {
-              processEntry(entry);
-            }
-          }
-        } else {
-          // Fallback to regular files
-          const files = e.dataTransfer.files;
-          if (files.length > 0) {
-            const validFiles = Array.from(files).filter(
-              file => file.name.endsWith('.xlsx') || file.name.endsWith('.xls')
-            );
-            
-            if (validFiles.length > 0) {
-              setFiles(validFiles);
-            } else {
-              setError("No Excel files found. Please upload .xlsx or .xls files.");
-            }
+        const droppedFiles = e.dataTransfer.files;
+        if (droppedFiles && droppedFiles.length > 0) {
+          const validFiles = Array.from(droppedFiles).filter(
+            file => file.name.endsWith('.xlsx') || file.name.endsWith('.xls')
+          );
+          
+          if (validFiles.length > 0) {
+            setFiles(validFiles);
+          } else {
+            setError("No Excel files found. Please upload .xlsx or .xls files.");
           }
         }
       };
@@ -853,4 +810,359 @@
             }
           }
           
-          if (processedEmployees.length ===
+          if (processedEmployees.length === 0) {
+            setError("No valid data could be extracted from the files. Please check the file format.");
+            setLoading(false);
+            return;
+          }
+          
+          // Find most common IRS rate
+          let maxCount = 0;
+          let consensusRate = 0;
+          
+          Object.entries(ratesCount).forEach(([rate, count]) => {
+            if (count > maxCount) {
+              maxCount = count;
+              consensusRate = parseFloat(rate);
+            }
+          });
+          
+          setMostCommonRate(consensusRate);
+          
+          // Apply consensus rate
+          const finalEmployees = processedEmployees.map(employee => ({
+            ...employee,
+            consensusRate,
+            consensusReimbursement: employee.entryTotalMiles * consensusRate
+          }));
+          
+          setEmployees(finalEmployees);
+          setProcessingComplete(true);
+        } catch (err) {
+          console.error("Processing error:", err);
+          setError("Error processing files. Please make sure all files are valid Excel spreadsheets.");
+        } finally {
+          setLoading(false);
+        }
+      };
+      
+     // Toggle expanded employee view
+const toggleEmployeeExpand = (index) => {
+  if (expandedEmployee === index) {
+    setExpandedEmployee(null);
+  } else {
+    setExpandedEmployee(index);
+  }
+};
+      
+      // Export data to Excel
+      const exportToExcel = () => {
+        // Create a new workbook
+        const wb = XLSX.utils.book_new();
+        
+        // Create worksheet data for the summary
+        const summaryData = [
+          ["T.W. FRIERSON MILEAGE SUMMARY"],
+          [""],
+          ["Report Date:", new Date().toLocaleDateString()],
+          ["IRS Mileage Rate:", "$" + mostCommonRate.toFixed(3) + " per mile"],
+          [""],
+          ["Employee Name", "Total Miles", "Reimbursement Amount"]
+        ];
+        
+        // Add employee data
+        employees.forEach(employee => {
+          summaryData.push([
+            employee.name,
+            employee.entryTotalMiles,
+            employee.consensusReimbursement
+          ]);
+        });
+        
+        // Calculate totals
+        const totalMiles = employees.reduce((sum, emp) => sum + emp.entryTotalMiles, 0);
+        const totalReimbursement = employees.reduce((sum, emp) => sum + emp.consensusReimbursement, 0);
+        
+        // Add totals row
+        summaryData.push(["", "", ""]);
+        summaryData.push(["TOTAL", totalMiles, totalReimbursement]);
+        
+        // Create the worksheet
+        const ws = XLSX.utils.aoa_to_sheet(summaryData);
+        
+        // Style the worksheet
+        // Merge title cell
+        ws['!merges'] = [{ s: {r:0, c:0}, e: {r:0, c:2} }];
+        
+        // Set column widths
+        ws['!cols'] = [
+          { wch: 30 }, // Column A
+          { wch: 15 }, // Column B
+          { wch: 20 }  // Column C
+        ];
+        
+        // Format numbers
+        // Loop through rows 6 and beyond (after the headers)
+        for (let i = 6; i < summaryData.length; i++) {
+          // Format miles (column B)
+          if (i < summaryData.length - 1) { // Skip empty row
+            const milesCell = XLSX.utils.encode_cell({r: i, c: 1});
+            if (ws[milesCell]) {
+              ws[milesCell].z = "0.0";
+            }
+            
+            // Format reimbursement (column C)
+            const reimburseCell = XLSX.utils.encode_cell({r: i, c: 2});
+            if (ws[reimburseCell]) {
+              ws[reimburseCell].z = "$0.00";
+            }
+          }
+        }
+        
+        // Add the worksheet to the workbook
+        XLSX.utils.book_append_sheet(wb, ws, "Mileage Summary");
+        
+        // Generate a filename with current date
+        const date = new Date();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        const filename = `TW_Frierson_Mileage_${month}_${year}.xlsx`;
+        
+        // Write the file and trigger download
+        XLSX.writeFile(wb, filename);
+      };
+      
+      return (
+        <div>
+          <div 
+            className={`drop-area ${isDragging ? 'active' : ''} ${files.length > 0 ? 'has-files' : ''}`}
+            onDrop={handleDrop}
+            onDragOver={(e) => {
+              e.preventDefault();
+              setIsDragging(true);
+            }}
+            onDragEnter={(e) => {
+              e.preventDefault();
+              setIsDragging(true);
+            }}
+            onDragLeave={(e) => {
+              e.preventDefault();
+              setIsDragging(false);
+            }}
+          >
+            <p>Drag & drop Excel files or a folder containing Excel files here</p>
+            <div className="button-group">
+              <input 
+                type="file" 
+                id="file-input" 
+                className="file-input" 
+                multiple 
+                onChange={handleFileSelect}
+                accept=".xlsx,.xls" 
+              />
+              <input 
+                type="file" 
+                id="folder-input" 
+                className="file-input" 
+                webkitdirectory="true"
+                directory="true"
+                multiple 
+                onChange={handleFolderSelect} 
+              />
+              <button 
+                className="upload-button" 
+                onClick={() => document.getElementById('file-input').click()}
+              >
+                SELECT FILES
+              </button>
+              <button 
+                className="upload-button" 
+                onClick={() => document.getElementById('folder-input').click()}
+              >
+                SELECT FOLDER
+              </button>
+            </div>
+          </div>
+          
+          {files.length > 0 && (
+            <div className="file-list">
+              <p>{files.length} file(s) selected:</p>
+              {files.map((file, index) => (
+                <div key={index} style={{marginTop: '8px'}}>
+                  {file.name}
+                </div>
+              ))}
+            </div>
+          )}
+          
+          <button 
+            className="convert-button" 
+            onClick={processFiles} 
+            disabled={files.length === 0 || loading}
+          >
+            PROCESS FILES
+          </button>
+          
+          {/* Error Message */}
+          {error && (
+            <div className="error-container">
+              <AlertIcon size={20} className="error-icon" color={`var(--brick)`} />
+              <p>{error}</p>
+            </div>
+          )}
+          
+          {/* Results */}
+          {processingComplete && employees.length > 0 && (
+            <div className="results-container">
+              <div className="results-header">
+                <div>
+                  <h3 className="results-title">Mileage Summary</h3>
+                  <p className="results-subtitle">
+                    Consensus IRS rate: ${mostCommonRate.toFixed(3)} per mile
+                  </p>
+                </div>
+                <button 
+                  className="upload-button"
+                  onClick={exportToExcel}
+                  style={{marginBottom: 0}}
+                >
+                  <DownloadIcon size={16} style={{marginRight: '8px'}} />
+                  EXPORT TO EXCEL
+                </button>
+              </div>
+              
+              <div className="table-responsive">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Employee</th>
+                      <th>Total Miles</th>
+                      <th>Reimbursement</th>
+                      <th>Status</th>
+                      <th>Details</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {employees.map((employee, index) => (
+                      <React.Fragment key={index}>
+                        <tr>
+                          <td>
+                            <div className="employee-name">{employee.name}</div>
+                            <div className="file-name">{employee.fileName}</div>
+                          </td>
+                          <td>
+                            {employee.entryTotalMiles.toFixed(1)}
+                            {!employee.milesMatch && (
+                              <div className="error-text">
+                                (Reported: {employee.totalMiles.toFixed(1)})
+                              </div>
+                            )}
+                          </td>
+                          <td>
+                            ${employee.consensusReimbursement.toFixed(2)}
+                            {Math.abs(employee.consensusReimbursement - employee.reportedReimbursement) > 0.01 && (
+                              <div className="error-text">
+                                (Reported: ${employee.reportedReimbursement.toFixed(2)})
+                              </div>
+                            )}
+                            <div className="file-name">
+                              Rate: ${employee.consensusRate.toFixed(3)}
+                              {employee.irsRate !== employee.consensusRate && (
+                                <span className="error-text">
+                                  (Reported: ${employee.irsRate.toFixed(3)})
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                          <td>
+                            {employee.milesMatch && Math.abs(employee.consensusReimbursement - employee.reportedReimbursement) <= 0.01 ? (
+                              <span className="badge badge-valid">
+                                <CheckIcon size={12} style={{marginRight: '5px'}} /> Valid
+                              </span>
+                            ) : (
+                              <span className="badge badge-error">
+                                <AlertIcon size={12} style={{marginRight: '5px'}} /> Discrepancy
+                              </span>
+                            )}
+                          </td>
+                          <td>
+                            <button 
+                              className="view-toggle"
+                              onClick={() => toggleEmployeeExpand(index)}
+                            >
+                              {expandedEmployee === index ? 'Hide' : 'View'}
+                              {expandedEmployee === index ? (
+                                <ChevronUpIcon size={14} className="toggle-icon" />
+                              ) : (
+                                <ChevronDownIcon size={14} className="toggle-icon" />
+                              )}
+                            </button>
+                          </td>
+                        </tr>
+                        
+                        {/* Expanded trip details */}
+                        {expandedEmployee === index && (
+                          <tr className="details-row">
+                            <td colSpan="5" className="details-content">
+                              <h4 className="details-title">
+                                Trip Details
+                              </h4>
+                              <div className="table-responsive">
+                                <table className="details-table">
+                                  <thead>
+                                    <tr>
+                                      <th>Date</th>
+                                      <th>Purpose</th>
+                                      <th>Description</th>
+                                      <th>Miles</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {employee.entries.map((entry, entryIndex) => (
+                                      <tr key={entryIndex}>
+                                        <td>{formatExcelDate(entry.date)}</td>
+                                        <td>{entry.purpose}</td>
+                                        <td>{entry.description}</td>
+                                        <td>{entry.miles.toFixed(1)}</td>
+                                      </tr>
+                                    ))}
+                                    <tr className="total-row">
+                                      <td colSpan="3" style={{textAlign: 'right'}}>
+                                        Total:
+                                      </td>
+                                      <td>
+                                        {employee.entryTotalMiles.toFixed(1)}
+                                      </td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </React.Fragment>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+          
+          {/* Loading Overlay */}
+          {loading && (
+            <div className="loading-overlay">
+              <div>
+                <div className="loading-spinner"></div>
+                <div className="loading-text">Processing files...</div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+    
+    // Render the app
+    ReactDOM.render(<MileageProcessor />, document.getElementById('app'));
+  </script>
+</body>
+</html>
