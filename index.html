@@ -1,883 +1,1163 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>T.W. FRIERSON Mileage Reimbursement Processor</title>
-  
-  <!-- Google Fonts: Source Sans Pro and Bitter (similar to Zilla Slab) -->
-  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&family=Bitter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  
-  <!-- Load libraries directly from CDNs -->
-  <script src="https://unpkg.com/react@17/umd/react.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
-  
-  <style>
-    /* T.W. Frierson brand colors */
-    :root {
-      --black: #333333; /* 4AM */
-      --yellow: #EBC42E; /* HARD HAT */
-      --blue: #30526E; /* BLUE COLLAR */
-      --brick: #BA6E4D; /* BRICK */
-      --concrete: #D1CCC7; /* CONCRETE */
-      --white: #FAF7F5; /* REFLECTOR */
-      
-      /* Dark mode variants */
-      --dark-bg: #1F1F1F;
-      --darker-bg: #151515;
-      --lighter-bg: #2A2A2A;
-      --border-color: #444444;
-    }
-    
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-    
-    body {
-      font-family: 'Source Sans Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-      background-color: var(--white);
-      color: var(--black);
-      line-height: 1.6;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-    
-    header {
-      background-color: var(--black);
-      color: white;
-      padding: 1.5rem 0;
-    }
-    
-    .container {
-      width: 90%;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-    
-    .header-content {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    
-    .logo-container {
-      display: flex;
-      align-items: center;
-    }
-    
-    .logo-icon {
-      background-color: var(--yellow);
-      width: 40px;
-      height: 40px;
-      border-radius: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-right: 15px;
-    }
-    
-    .company-name {
-      font-family: 'Bitter', Georgia, serif;
-      font-size: 1.5rem;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-    }
-    
-    .company-title {
-      font-size: 0.9rem;
-      font-weight: 400;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-    }
-    
-    main {
-      flex: 1;
-      padding: 3rem 0;
-    }
-    
-    h1, h2, h3, h4, h5, h6 {
-      font-family: 'Bitter', Georgia, serif;
-      font-weight: 600;
-      margin-bottom: 1rem;
-      color: var(--black);
-    }
-    
-    h1 {
-      font-size: 2.2rem;
-      text-align: center;
-      color: var(--yellow);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 0.5rem;
-    }
-    
-    h2.tagline {
-      font-size: 1.2rem;
-      text-align: center;
-      color: var(--concrete);
-      margin-bottom: 2rem;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    
-    .intro-text {
-      text-align: center;
-      max-width: 700px;
-      margin: 0 auto 2.5rem;
-    }
-    
-    /* Training section / Instructions */
-    .training-box {
-      margin-bottom: 2.5rem;
-      border: 1px solid var(--border-color);
-      border-radius: 4px;
-      overflow: hidden;
-      background-color: white;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    }
-    
-    .training-header {
-      background-color: var(--blue);
-      color: white;
-      padding: 1rem 1.5rem;
-      cursor: pointer;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-      transition: background-color 0.2s ease;
-    }
-    
-    .training-header:hover {
-      background-color: #3A6082;
-    }
-    
-    .training-content {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.3s ease-out;
-      padding: 0 1.5rem;
-    }
-    
-    .training-content.show {
-      max-height: 2000px;
-      padding: 1.5rem;
-      transition: max-height 0.5s ease-in, padding 0.3s linear;
-    }
-    
-    .training-content h4 {
-      color: var(--blue);
-      margin-top: 1.5rem;
-      margin-bottom: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      font-size: 1.1rem;
-    }
-    
-    .training-content h4:first-child {
-      margin-top: 0;
-    }
-    
-    .training-content ol, .training-content ul {
-      margin-left: 1.5rem;
-      padding-left: 0;
-    }
-    
-    .training-content li {
-      margin-bottom: 0.75rem;
-    }
-    
-    .training-content li:last-child {
-      margin-bottom: 0;
-    }
-    
-    .training-content p {
-      margin-top: 0;
-      margin-bottom: 1rem;
-    }
-    
-    .training-content .note {
-      background-color: rgba(235, 196, 46, 0.1);
-      border-left: 3px solid var(--yellow);
-      padding: 1rem 1.5rem;
-      margin: 1.5rem 0;
-    }
-    
-    /* Main app container */
-    .app-container {
-      background-color: white;
-      border-radius: 6px;
-      padding: 2.5rem;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-      border: 1px solid #e0e0e0;
-      margin-bottom: 2.5rem;
-    }
-    
-    /* File drop zone */
-    .drop-area {
-      border: 4px dashed var(--yellow);
-      border-radius: 8px;
-      padding: 2.5rem;
-      margin-bottom: 2.5rem;
-      text-align: center;
-      transition: all 0.3s ease;
-      background-color: rgba(235, 196, 46, 0.05);
-      position: relative;
-    }
-    
-    .drop-area:hover, .drop-area.active {
-      background-color: rgba(235, 196, 46, 0.1);
-    }
-    
-    .drop-area.has-files {
-      border-color: #27ae60; /* Green for success */
-      background-color: rgba(39, 174, 96, 0.05);
-    }
-    
-    .icon-container {
-      margin-bottom: 1.5rem;
-    }
-    
-    .files-selected {
-      font-size: 1.2rem;
-      font-weight: 600;
-      margin-bottom: 1rem;
-      color: var(--black);
-    }
-    
-    .dropzone-instructions {
-      margin-bottom: 1.5rem;
-      color: #666;
-    }
-    
-    /* Buttons */
-    .button-group {
-      margin-top: 1.5rem;
-      display: flex;
-      justify-content: center;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-    
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0.75rem 1.5rem;
-      border-radius: 6px;
-      font-weight: 600;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      border: none;
-      outline: none;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    
-    .btn-primary {
-      background-color: var(--blue);
-      color: white;
-    }
-    
-    .btn-primary:hover {
-      background-color: #3A6082;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-    
-    .btn-primary:disabled {
-      background-color: #30526E80;
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
-    }
-    
-    .btn-secondary {
-      background-color: var(--yellow);
-      color: var(--black);
-    }
-    
-    .btn-secondary:hover {
-      background-color: #d9b32a;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-    
-    .btn-export {
-      background-color: var(--black);
-      color: white;
-      margin-left: 1rem;
-    }
-    
-    .btn-export:hover {
-      background-color: #484848;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-    
-    .file-input {
-      display: none;
-    }
-    
-    /* Error message */
-    .error-container {
-      background-color: #ffebee;
-      border-left: 5px solid #f44336;
-      color: #d32f2f;
-      padding: 1rem 1.5rem;
-      border-radius: 4px;
-      margin-bottom: 2rem;
-      display: flex;
-      align-items: center;
-    }
-    
-    .error-icon {
-      margin-right: 1rem;
-      flex-shrink: 0;
-    }
-    
-    /* Results container */
-    .results-container {
-      background-color: white;
-      border-radius: 8px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-      overflow: hidden;
-      margin-bottom: 2.5rem;
-    }
-    
-    .results-header {
-      padding: 1.5rem 2rem;
-      background-color: var(--concrete);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid #ccc;
-    }
-    
-    .results-title {
-      margin: 0;
-      font-size: 1.5rem;
-    }
-    
-    .results-subtitle {
-      color: var(--blue);
-      font-weight: 600;
-      margin-top: 0.25rem;
-    }
-    
-    /* Tables */
-    .table-responsive {
-      overflow-x: auto;
-    }
-    
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-    
-    thead {
-      background-color: var(--concrete);
-      border-bottom: 2px solid #999;
-    }
-    
-    th {
-      text-align: left;
-      padding: 1rem 1.5rem;
-      font-family: 'Bitter', serif;
-      font-weight: 600;
-      color: var(--black);
-      text-transform: uppercase;
-      font-size: 0.875rem;
-      letter-spacing: 0.05rem;
-    }
-    
-    td {
-      padding: 1rem 1.5rem;
-      border-bottom: 1px solid #e0e0e0;
-      vertical-align: middle;
-    }
-    
-    tbody tr:hover {
-      background-color: rgba(209, 204, 199, 0.1);
-    }
-    
-    .employee-name {
-      font-weight: 600;
-      font-size: 1.05rem;
-      color: var(--black);
-    }
-    
-    .file-name {
-      font-size: 0.85rem;
-      color: #777;
-      margin-top: 0.25rem;
-    }
-    
-    /* Status badges */
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 0.25rem 0.75rem;
-      border-radius: 999px;
-      font-size: 0.8rem;
-      font-weight: 600;
-    }
-    
-    .badge-valid {
-      background-color: #d4edda;
-      color: #155724;
-    }
-    
-    .badge-error {
-      background-color: #f8d7da;
-      color: #721c24;
-    }
-    
-    .icon-sm {
-      margin-right: 0.35rem;
-    }
-    
-    /* Toggle buttons */
-    .view-toggle {
-      background: none;
-      border: none;
-      color: var(--blue);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      font-weight: 600;
-      padding: 0.25rem 0.5rem;
-      transition: color 0.3s;
-    }
-    
-    .view-toggle:hover {
-      color: var(--black);
-    }
-    
-    .toggle-icon {
-      margin-left: 0.5rem;
-    }
-    
-    /* Details row */
-    .details-row {
-      background-color: #f8f8f8;
-    }
-    
-    .details-content {
-      padding: 1.5rem 2rem;
-    }
-    
-    .details-title {
-      margin-bottom: 1rem;
-      font-size: 1.1rem;
-      display: flex;
-      align-items: center;
-    }
-    
-    .details-table th,
-    .details-table td {
-      padding: 0.75rem 1rem;
-      font-size: 0.9rem;
-    }
-    
-    .details-table tr:last-child td {
-      border-bottom: none;
-    }
-    
-    .total-row {
-      background-color: var(--concrete);
-      font-weight: 700;
-    }
-    
-    .error-text {
-      color: #dc3545;
-      font-size: 0.85rem;
-      margin-left: 0.5rem;
-    }
-    
-    /* Footer */
-    footer {
-      background-color: var(--black);
-      color: white;
-      padding: 2rem 0;
-      text-align: center;
-      margin-top: auto;
-    }
-    
-    .footer-content {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    
-    .footer-logo {
-      display: flex;
-      align-items: center;
-      margin-bottom: 1rem;
-    }
-    
-    .footer-icon {
-      width: 36px;
-      height: 36px;
-      background-color: var(--yellow);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-right: 1rem;
-    }
-    
-    .footer-name {
-      font-weight: 600;
-      letter-spacing: 0.05rem;
-      text-transform: uppercase;
-    }
-    
-    .footer-message {
-      color: #aaa;
-      margin-top: 0.5rem;
-      font-size: 0.9rem;
-    }
-    
-    /* Loading overlay */
-    .loading-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-    }
-    
-    .loading-spinner {
-      width: 50px;
-      height: 50px;
-      border: 5px solid var(--concrete);
-      border-top-color: var(--yellow);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-    
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-    
-    .loading-text {
-      color: white;
-      margin-top: 1rem;
-      font-size: 1.2rem;
-    }
-    
-    /* Security notice */
-    .security-notice {
-      margin-top: 2rem;
-      background-color: rgba(186, 110, 77, 0.15);
-      border-radius: 4px;
-      padding: 1.5rem 2rem;
-      border-left: 4px solid var(--brick);
-    }
-    
-    .security-notice h3 {
-      margin-top: 0;
-      margin-bottom: 0.5rem;
-      color: var(--brick);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    
-    .security-notice p {
-      margin: 0;
-      color: #666;
-      font-size: 0.9rem;
-    }
-    
-    /* Scrollbar styling */
-    ::-webkit-scrollbar {
-      width: 8px;
-    }
-    
-    ::-webkit-scrollbar-track {
-      background: #f1f1f1;
-      border-radius: 4px;
-    }
-    
-    ::-webkit-scrollbar-thumb {
-      background: #bbb;
-      border-radius: 4px;
-    }
-    
-    ::-webkit-scrollbar-thumb:hover {
-      background: #999;
-    }
-    
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
-      .header-content {
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-      }
-      
-      .company-title {
-        margin-top: 0.5rem;
-      }
-      
-      .app-container, .drop-area {
-        padding: 1.5rem;
-      }
-      
-      .results-header {
-        flex-direction: column;
-        gap: 1rem;
-        align-items: flex-start;
-      }
-      
-      .button-group {
-        flex-direction: column;
-        align-items: center;
-      }
-      
-      .btn {
-        width: 100%;
-        margin-bottom: 0.5rem;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>T.W. Frierson Mileage Reimbursement Processor</title>
+    
+    <!-- Load libraries directly from CDNs -->
+    <script src="https://unpkg.com/react@17/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    
+    <!-- Google Fonts: Source Sans Pro and Bitter (similar to Zilla Slab) -->
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&family=Bitter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* T.W. Frierson brand colors */
+        :root {
+            --black: #333333; /* 4AM */
+            --yellow: #EBC42E; /* HARD HAT */
+            --blue: #30526E; /* BLUE COLLAR */
+            --brick: #BA6E4D; /* BRICK */
+            --concrete: #D1CCC7; /* CONCRETE */
+            --white: #FAF7F5; /* REFLECTOR */
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Source Sans Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--white);
+            color: var(--black);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        header {
+            background-color: var(--black);
+            color: white;
+            padding: 1.5rem 0;
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo-icon {
+            background-color: var(--yellow);
+            width: 40px;
+            height: 40px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+        }
+        
+        .company-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        
+        .company-title {
+            font-size: 0.9rem;
+            font-weight: 400;
+            letter-spacing: 1px;
+        }
+        
+        main {
+            flex: 1;
+            padding: 3rem 0;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Bitter', Georgia, serif;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        h2 {
+            font-size: 2.2rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        h3 {
+            font-size: 1.5rem;
+            border-bottom: 3px solid var(--yellow);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+            display: inline-block;
+        }
+        
+        .intro-text {
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto 2.5rem;
+        }
+        
+        .dropzone {
+            border: 4px dashed var(--yellow);
+            border-radius: 8px;
+            padding: 2.5rem;
+            margin-bottom: 2.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            background-color: rgba(235, 196, 46, 0.05);
+            position: relative;
+        }
+        
+        .dropzone:hover, .dropzone.active {
+            background-color: rgba(235, 196, 46, 0.1);
+        }
+        
+        .dropzone.has-files {
+            border-color: #27ae60; /* Green for success */
+            background-color: rgba(39, 174, 96, 0.05);
+        }
+        
+        .icon-container {
+            margin-bottom: 1.5rem;
+        }
+        
+        .dropzone-icon {
+            font-size: 2.5rem;
+            color: var(--blue);
+        }
+        
+        .files-selected {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--black);
+        }
+        
+        .dropzone-instructions {
+            margin-bottom: 1.5rem;
+            color: #666;
+        }
+        
+        .button-group {
+            margin-top: 1.5rem;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-family: 'Source Sans Pro', sans-serif;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            outline: none;
+            margin: 0 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .btn-primary {
+            background-color: var(--blue);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #264056;
+        }
+        
+        .btn-secondary {
+            background-color: var(--yellow);
+            color: var(--black);
+        }
+        
+        .btn-secondary:hover {
+            background-color: #d4b32a;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .error-container {
+            background-color: #ffebee;
+            border-left: 5px solid #f44336;
+            color: #d32f2f;
+            padding: 1rem 1.5rem;
+            border-radius: 4px;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .error-icon {
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+        
+        .results-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin-bottom: 2.5rem;
+        }
+        
+        .results-header {
+            padding: 1.5rem 2rem;
+            background-color: var(--concrete);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .results-title {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        
+        .results-subtitle {
+            color: var(--blue);
+            font-weight: 600;
+            margin-top: 0.25rem;
+        }
+        
+        .table-responsive {
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        thead {
+            background-color: var(--concrete);
+            border-bottom: 2px solid #999;
+        }
+        
+        th {
+            text-align: left;
+            padding: 1rem 1.5rem;
+            font-family: 'Bitter', serif;
+            font-weight: 600;
+            color: var(--black);
+            text-transform: uppercase;
+            font-size: 0.875rem;
+            letter-spacing: 0.05rem;
+        }
+        
+        td {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e0e0e0;
+            vertical-align: middle;
+        }
+        
+        tbody tr:hover {
+            background-color: rgba(209, 204, 199, 0.1);
+        }
+        
+        .employee-name {
+            font-weight: 600;
+            font-size: 1.05rem;
+            color: var(--black);
+        }
+        
+        .file-name {
+            font-size: 0.85rem;
+            color: #777;
+            margin-top: 0.25rem;
+        }
+        
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .badge-valid {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .badge-error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .icon-sm {
+            margin-right: 0.35rem;
+        }
+        
+        .view-toggle {
+            background: none;
+            border: none;
+            color: var(--blue);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            padding: 0.25rem 0.5rem;
+            transition: color 0.3s;
+        }
+        
+        .view-toggle:hover {
+            color: var(--black);
+        }
+        
+        .toggle-icon {
+            margin-left: 0.5rem;
+        }
+        
+        .details-row {
+            background-color: #f8f8f8;
+        }
+        
+        .details-content {
+            padding: 1.5rem 2rem;
+        }
+        
+        .details-title {
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .details-table th,
+        .details-table td {
+            padding: 0.75rem 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .details-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .total-row {
+            background-color: var(--concrete);
+            font-weight: 700;
+        }
+        
+        .error-text {
+            color: #dc3545;
+            font-size: 0.85rem;
+            margin-left: 0.5rem;
+        }
+        
+        .results-footer {
+            padding: 1.25rem 2rem;
+            background-color: var(--concrete);
+            display: flex;
+            justify-content: flex-end;
+        }
+        
+        footer {
+            background-color: var(--black);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            margin-top: auto;
+        }
+        
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .footer-logo {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .footer-icon {
+            width: 36px;
+            height: 36px;
+            background-color: var(--yellow);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+        }
+        
+        .footer-name {
+            font-weight: 600;
+            letter-spacing: 0.05rem;
+            text-transform: uppercase;
+        }
+        
+        .footer-message {
+            color: #aaa;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid var(--concrete);
+            border-top-color: var(--yellow);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        .loading-text {
+            color: white;
+            margin-top: 1rem;
+            font-size: 1.2rem;
+        }
+        
+        .core-values {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            margin: 2rem 0;
+            gap: 1rem;
+        }
+        
+        .core-value {
+            background-color: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+            flex: 1;
+            min-width: 200px;
+            max-width: 250px;
+            border-top: 4px solid var(--yellow);
+        }
+        
+        .core-value h4 {
+            color: var(--blue);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+        }
+        
+        .core-value p {
+            color: var(--black);
+            font-size: 0.9rem;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+            
+            .company-title {
+                margin-top: 0.5rem;
+            }
+            
+            h2 {
+                font-size: 1.8rem;
+            }
+            
+            .dropzone {
+                padding: 1.5rem;
+            }
+            
+            .btn {
+                padding: 0.6rem 1.2rem;
+                font-size: 0.9rem;
+                margin-bottom: 0.5rem;
+            }
+            
+            .button-group {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            th, td {
+                padding: 0.75rem;
+            }
+            
+            .core-values {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .core-value {
+                max-width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div id="app"></div>
-  
-  <script type="text/babel">
-    // Icon Components
-    const FileIcon = ({size = 24, color = "currentColor"}) => (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-        <polyline points="14 2 14 8 20 8"></polyline>
-        <line x1="16" y1="13" x2="8" y2="13"></line>
-        <line x1="16" y1="17" x2="8" y2="17"></line>
-        <polyline points="10 9 9 9 8 9"></polyline>
-      </svg>
-    );
+    <div id="app"></div>
     
-    const CheckIcon = ({size = 24, color = "currentColor"}) => (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="20 6 9 17 4 12"></polyline>
-      </svg>
-    );
-    
-    const AlertIcon = ({size = 24, color = "currentColor"}) => (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="10"></circle>
-        <line x1="12" y1="8" x2="12" y2="12"></line>
-        <line x1="12" y1="16" x2="12.01" y2="16"></line>
-      </svg>
-    );
-    
-    const ChevronDownIcon = ({size = 24, color = "currentColor"}) => (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="6 9 12 15 18 9"></polyline>
-      </svg>
-    );
-    
-    const ChevronUpIcon = ({size = 24, color = "currentColor"}) => (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="18 15 12 9 6 15"></polyline>
-      </svg>
-    );
-    
-    const DownloadIcon = ({size = 24, color = "currentColor"}) => (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-        <polyline points="7 10 12 15 17 10"></polyline>
-        <line x1="12" y1="15" x2="12" y2="3"></line>
-      </svg>
-    );
-    
-    const HelmetIcon = ({size = 24, color = "currentColor"}) => (
-      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 4C7.58 4 4 7.58 4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7c0-4.42-3.58-8-8-8z"></path>
-        <path d="M8 12h8"></path>
-        <path d="M9 17v-5"></path>
-        <path d="M15 17v-5"></path>
-      </svg>
-    );
-    
-    // Helper function to format Excel serial date
-    const formatExcelDate = (serialDate) => {
-      if (!serialDate) return '';
-      
-      // Check if it's already a formatted date string
-      if (typeof serialDate === 'string' && 
-          (serialDate.includes('/') || serialDate.includes('-'))) {
-        return serialDate;
-      }
-      
-      try {
-        // Parse the Excel serial date
-        const excelEpoch = new Date(1900, 0, 1);
-        const daysSinceEpoch = serialDate - 1; // Adjust for Excel's start date
-        const millisecondsSinceEpoch = daysSinceEpoch * 24 * 60 * 60 * 1000;
-        const date = new Date(excelEpoch.getTime() + millisecondsSinceEpoch);
+    <script type="text/babel">
+        // Icon Components
+        const FileIcon = ({size = 24, color = "currentColor"}) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+        );
         
-        // Format date as MM/DD/YYYY
-        return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
-      } catch (e) {
-        console.error("Error formatting date:", e);
-        return String(serialDate); // Return original value if parsing fails
-      }
-    };
-    
-    function MileageProcessor() {
-      const [files, setFiles] = React.useState([]);
-      const [employees, setEmployees] = React.useState([]);
-      const [loading, setLoading] = React.useState(false);
-      const [error, setError] = React.useState(null);
-      const [mostCommonRate, setMostCommonRate] = React.useState(null);
-      const [expandedEmployee, setExpandedEmployee] = React.useState(null);
-      const [processingComplete, setProcessingComplete] = React.useState(false);
-      const [isDragging, setIsDragging] = React.useState(false);
-      const [showInstructions, setShowInstructions] = React.useState(false);
-      
-      // Toggle instructions
-      const toggleInstructions = () => {
-        setShowInstructions(!showInstructions);
-      };
-      
-      // Handle file drop
-      const handleDrop = (e) => {
-        e.preventDefault();
-        setError(null);
-        setIsDragging(false);
+        const CheckIcon = ({size = 24, color = "currentColor"}) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+        );
         
-        const items = e.dataTransfer.items;
-        const droppedFiles = [];
-        let pendingFiles = 0;
+        const AlertIcon = ({size = 24, color = "currentColor"}) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+        );
         
-        // Process all dropped items (files and folders)
-        const processEntry = async (entry) => {
-          if (entry.isFile) {
-            if (entry.name.endsWith('.xlsx') || entry.name.endsWith('.xls')) {
-              pendingFiles++;
-              entry.file(file => {
-                droppedFiles.push(file);
-                pendingFiles--;
-                
-                // When all files are processed
-                if (pendingFiles === 0 && droppedFiles.length > 0) {
-                  setFiles(droppedFiles);
+        const ChevronDownIcon = ({size = 24, color = "currentColor"}) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+        );
+        
+        const ChevronUpIcon = ({size = 24, color = "currentColor"}) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="18 15 12 9 6 15"></polyline>
+            </svg>
+        );
+        
+        const DownloadIcon = ({size = 24, color = "currentColor"}) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+        );
+        
+        const HelmetIcon = ({size = 24, color = "currentColor"}) => (
+            <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 4C7.58 4 4 7.58 4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7c0-4.42-3.58-8-8-8z"></path>
+                <path d="M8 12h8"></path>
+                <path d="M9 17v-5"></path>
+                <path d="M15 17v-5"></path>
+            </svg>
+        );
+        
+        // Helper function to format Excel serial date
+        const formatExcelDate = (serialDate) => {
+            if (!serialDate) return '';
+            
+            try {
+                // Check if it's already a formatted date string
+                if (typeof serialDate === 'string' && 
+                    (serialDate.includes('/') || serialDate.includes('-'))) {
+                    return serialDate;
                 }
-              });
+                
+                // Try to parse the date as a number
+                const numericDate = parseFloat(serialDate);
+                if (isNaN(numericDate)) {
+                    return String(serialDate); // Return as is if not a number
+                }
+                
+                // Excel's date system: Jan 1, 1900 = 1
+                // JavaScript's date system: Jan 1, 1970
+                
+                // Adjust for Excel's leap year bug: Excel thinks 1900 was a leap year
+                const adjustedDate = numericDate > 60 ? numericDate - 1 : numericDate;
+                
+                // Calculate date
+                const millisecondsPerDay = 24 * 60 * 60 * 1000;
+                const baseDate = new Date(1900, 0, 1); // Jan 1, 1900
+                const daysSinceBaseDate = adjustedDate - 1; // Excel dates are 1-based
+                const targetDate = new Date(baseDate.getTime() + daysSinceBaseDate * millisecondsPerDay);
+                
+                // Format as MM/DD/YYYY
+                const month = targetDate.getMonth() + 1;
+                const day = targetDate.getDate();
+                const year = targetDate.getFullYear();
+                
+                return `${month}/${day}/${year}`;
+            } catch (e) {
+                console.error("Error formatting date:", e, "for value:", serialDate);
+                return String(serialDate); // Return original value if parsing fails
             }
-          } else if (entry.isDirectory) {
-            pendingFiles++;
-            const dirReader = entry.createReader();
-            dirReader.readEntries(entries => {
-              entries.forEach(subEntry => processEntry(subEntry));
-              pendingFiles--;
-            });
-          }
         };
         
-        // If webkitGetAsEntry is available (Chrome, Edge)
-        if (items && items[0]?.webkitGetAsEntry) {
-          for (let i = 0; i < items.length; i++) {
-            const entry = items[i].webkitGetAsEntry();
-            if (entry) {
-              processEntry(entry);
-            }
-          }
-        } else {
-          // Fallback to regular files
-          const files = e.dataTransfer.files;
-          if (files.length > 0) {
-            const validFiles = Array.from(files).filter(
-              file => file.name.endsWith('.xlsx') || file.name.endsWith('.xls')
-            );
+        function MileageProcessor() {
+            const [files, setFiles] = React.useState([]);
+            const [employees, setEmployees] = React.useState([]);
+            const [loading, setLoading] = React.useState(false);
+            const [error, setError] = React.useState(null);
+            const [mostCommonRate, setMostCommonRate] = React.useState(null);
+            const [expandedEmployee, setExpandedEmployee] = React.useState(null);
+            const [processingComplete, setProcessingComplete] = React.useState(false);
+            const [isDragging, setIsDragging] = React.useState(false);
             
-            if (validFiles.length > 0) {
-              setFiles(validFiles);
-            } else {
-              setError("No Excel files found. Please upload .xlsx or .xls files.");
-            }
-          }
+            // Handle file drop
+            const handleDrop = (e) => {
+                e.preventDefault();
+                setError(null);
+                setIsDragging(false);
+                
+                const items = e.dataTransfer.items;
+                const droppedFiles = [];
+                let pendingFiles = 0;
+                
+                // Process all dropped items (files and folders)
+                const processEntry = async (entry) => {
+                    if (entry.isFile) {
+                        if (entry.name.endsWith('.xlsx') || entry.name.endsWith('.xls')) {
+                            pendingFiles++;
+                            entry.file(file => {
+                                droppedFiles.push(file);
+                                pendingFiles--;
+                                
+                                // When all files are processed
+                                if (pendingFiles === 0 && droppedFiles.length > 0) {
+                                    setFiles(droppedFiles);
+                                }
+                            });
+                        }
+                    } else if (entry.isDirectory) {
+                        pendingFiles++;
+                        const dirReader = entry.createReader();
+                        dirReader.readEntries(entries => {
+                            entries.forEach(subEntry => processEntry(subEntry));
+                            pendingFiles--;
+                        });
+                    }
+                };
+                
+                // If webkitGetAsEntry is available (Chrome, Edge)
+                if (items && items[0]?.webkitGetAsEntry) {
+                    for (let i = 0; i < items.length; i++) {
+                        const entry = items[i].webkitGetAsEntry();
+                        if (entry) {
+                            processEntry(entry);
+                        }
+                    }
+                } else {
+                    // Fallback to regular files
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        const validFiles = Array.from(files).filter(
+                            file => file.name.endsWith('.xlsx') || file.name.endsWith('.xls')
+                        );
+                        
+                        if (validFiles.length > 0) {
+                            setFiles(validFiles);
+                        } else {
+                            setError("No Excel files found. Please upload .xlsx or .xls files.");
+                        }
+                    }
+                }
+            };
+            
+            // Handle file selection via input
+            const handleFileSelect = (e) => {
+                setError(null);
+                
+                const selectedFiles = e.target.files;
+                if (selectedFiles.length > 0) {
+                    const validFiles = Array.from(selectedFiles).filter(
+                        file => file.name.endsWith('.xlsx') || file.name.endsWith('.xls')
+                    );
+                    
+                    if (validFiles.length > 0) {
+                        setFiles(validFiles);
+                    } else {
+                        setError("No Excel files found. Please select .xlsx or .xls files.");
+                    }
+                }
+            };
+            
+            // Process files
+            const processFiles = async () => {
+                if (files.length === 0) return;
+                
+                setLoading(true);
+                setError(null);
+                setProcessingComplete(false);
+                setEmployees([]);
+                
+                try {
+                    const processedEmployees = [];
+                    const ratesCount = {};
+                    
+                    for (const file of files) {
+                        try {
+                            const arrayBuffer = await file.arrayBuffer();
+                            const workbook = XLSX.read(arrayBuffer, {
+                                type: 'array',
+                                cellDates: false // Don't auto-convert dates, we'll handle formatting
+                            });
+                            
+                            const firstSheetName = workbook.SheetNames[0];
+                            const worksheet = workbook.Sheets[firstSheetName];
+                            
+                            // Get employee data
+                            const employeeName = worksheet['B2']?.v || 'Unknown';
+                            const totalMiles = parseFloat(worksheet['B3']?.v) || 0;
+                            const irsRate = parseFloat(worksheet['B4']?.v) || 0;
+                            const reportedReimbursement = parseFloat(worksheet['B5']?.v) || 0;
+                            
+                            // Count IRS rates for consensus
+                            ratesCount[irsRate] = (ratesCount[irsRate] || 0) + 1;
+                            
+                            // Get individual entries
+                            const entries = [];
+                            let rowIndex = 7;
+                            let entryTotalMiles = 0;
+                            
+                            while (worksheet[`A${rowIndex}`]) {
+                                const date = worksheet[`A${rowIndex}`]?.v || '';
+                                const purpose = worksheet[`B${rowIndex}`]?.v || '';
+                                const description = worksheet[`C${rowIndex}`]?.v || '';
+                                const miles = parseFloat(worksheet[`D${rowIndex}`]?.v) || 0;
+                                
+                                entries.push({
+                                    date,
+                                    purpose,
+                                    description,
+                                    miles
+                                });
+                                
+                                entryTotalMiles += miles;
+                                rowIndex++;
+                            }
+                            
+                            // Validate miles match
+                            const milesMatch = Math.abs(totalMiles - entryTotalMiles) < 0.01;
+                            
+                            processedEmployees.push({
+                                name: employeeName,
+                                fileName: file.name,
+                                totalMiles,
+                                irsRate,
+                                reportedReimbursement,
+                                calculatedReimbursement: entryTotalMiles * irsRate,
+                                entries,
+                                milesMatch,
+                                entryTotalMiles
+                            });
+                        } catch (err) {
+                            console.error(`Error processing file ${file.name}:`, err);
+                            setError(`Error processing file "${file.name}". Please ensure it has the expected format.`);
+                        }
+                    }
+                    
+                    if (processedEmployees.length === 0) {
+                        setError("No valid data could be extracted from the files. Please check the file format.");
+                        setLoading(false);
+                        return;
+                    }
+                    
+                    // Find most common IRS rate
+                    let maxCount = 0;
+                    let consensusRate = 0;
+                    
+                    Object.entries(ratesCount).forEach(([rate, count]) => {
+                        if (count > maxCount) {
+                            maxCount = count;
+                            consensusRate = parseFloat(rate);
+                        }
+                    });
+                    
+                    setMostCommonRate(consensusRate);
+                    
+                    // Apply consensus rate
+                    const finalEmployees = processedEmployees.map(employee => ({
+                        ...employee,
+                        consensusRate,
+                        consensusReimbursement: employee.entryTotalMiles * consensusRate
+                    }));
+                    
+                    setEmployees(finalEmployees);
+                    setProcessingComplete(true);
+                } catch (err) {
+                    console.error("Processing error:", err);
+                    setError("Error processing files. Please make sure all files are valid Excel spreadsheets.");
+                } finally {
+                    setLoading(false);
+                }
+            };
+            
+            // Toggle expanded employee view
+            const toggleEmployeeExpand = (index) => {
+                if (expandedEmployee === index) {
+                    setExpandedEmployee(null);
+                } else {
+                    setExpandedEmployee(index);
+                }
+            };
+            
+            // Export data to Excel
+            const exportToExcel = () => {
+                // Create worksheet data
+                const exportData = employees.map(employee => ({
+                    'Employee Name': employee.name,
+                    'Total Miles': employee.entryTotalMiles,
+                    'Reimbursement': employee.consensusReimbursement
+                }));
+                
+                // Create workbook and worksheet
+                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.json_to_sheet(exportData);
+                
+                // Add IRS rate at the top of the worksheet
+                XLSX.utils.sheet_add_aoa(ws, [
+                    ["IRS Mileage Rate:", mostCommonRate.toFixed(3)],
+                    [""],  // Empty row for spacing
+                    ["Mileage Reimbursement Summary"]
+                ], { origin: "A1" });
+                
+                // Apply some styling
+                ws['!cols'] = [
+                    { wch: 25 },  // Width of Employee Name column
+                    { wch: 15 },  // Width of Total Miles column
+                    { wch: 15 }   // Width of Reimbursement column
+                ];
+                
+                // Add the worksheet to the workbook
+                XLSX.utils.book_append_sheet(wb, ws, "Mileage Reimbursements");
+                
+                // Generate a filename with current date
+                const date = new Date();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const year = date.getFullYear();
+                const filename = `TW_Frierson_Mileage_${month}_${year}.xlsx`;
+                
+                // Write the file and trigger download
+                XLSX.writeFile(wb, filename);
+            };
+            
+            return (
+                <div>
+                    {/* Header */}
+                    <header>
+                        <div className="container">
+                            <div className="header-content">
+                                <div className="logo-container">
+                                    <div className="logo-icon">
+                                        <HelmetIcon color="#333333" />
+                                    </div>
+                                    <h1 className="company-name">T.W. FRIERSON</h1>
+                                </div>
+                                <div className="company-title">CONTRACTOR, INC.</div>
+                            </div>
+                        </div>
+                    </header>
+                    
+                    <main>
+                        <div className="container">
+                            <h2>Mileage Reimbursement Processor</h2>
+                            
+                            <p className="intro-text">
+                                Streamline your monthly mileage reimbursement process. Drop a folder containing employee 
+                                mileage spreadsheets or select individual files to process. The app will validate the data, 
+                                apply the correct IRS rate, and generate a summary report.
+                            </p>
+                            
+                            {/* Company Core Values */}
+                            <div className="core-values">
+                                <div className="core-value">
+                                    <h4>No Surprises</h4>
+                                    <p>We value transparency and clarity in all processes, ensuring every step is predictable.</p>
+                                </div>
+                                <div className="core-value">
+                                    <h4>Sense of Urgency</h4>
+                                    <p>We recognize the importance of timely action and efficient processes.</p>
+                                </div>
+                                <div className="core-value">
+                                    <h4>Fast Decisions</h4>
+                                    <p>We streamline decision-making to keep projects and processes moving forward.</p>
+                                </div>
+                            </div>
+                            
+                            {/* File Drop Zone */}
+                            <div 
+                                className={`dropzone ${isDragging ? 'active' : ''} ${files.length > 0 ? 'has-files' : ''}`}
+                                onDrop={handleDrop}
+                                onDragOver={(e) => {
+                                    e.preventDefault();
+                                    setIsDragging(true);
+                                }}
+                                onDragEnter={(e) => {
+                                    e.preventDefault();
+                                    setIsDragging(true);
+                                }}
+                                onDragLeave={(e) => {
+                                    e.preventDefault();
+                                    setIsDragging(false);
+                                }}
+                            >
+                                <div className="icon-container">
+                                    <FileIcon size={50} color={files.length > 0 ? "#27ae60" : "#30526E"} />
+                                </div>
+                                
+                                {files.length > 0 ? (
+                                    <div className="files-selected">
+                                        {files.length} file{files.length !== 1 ? 's' : ''} selected
+                                    </div>
+                                ) : (
+                                    <div className="dropzone-instructions">
+                                        <p><strong>Drag & drop</strong> a folder or Excel files here</p>
+                                        <p>- OR -</p>
+                                    </div>
+                                )}
+                                
+                                <div className="button-group">
+                                    <label className="btn btn-primary">
+                                        Select Files
+                                        <input 
+                                            type="file" 
+                                            multiple 
+                                            onChange={handleFileSelect} 
+                                            className="file-input" 
+                                            accept=".xlsx,.xls"
+                                        />
+                                    </label>
+                                    
+                                    {files.length > 0 && (
+                                        <button 
+                                            className="btn btn-secondary" 
+                                            onClick={processFiles}
+                                            disabled={loading}
+                                        >
+                                            {loading ? 'Processing...' : 'Process Files'}
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                            
+                            {/* Error Message */}
+                            {error && (
+                                <div className="error-container">
+                                    <AlertIcon size={24} className="error-icon" />
+                                    <p>{error}</p>
+                                </div>
+                            )}
+                            
+                            {/* Results */}
+                            {processingComplete && employees.length > 0 && (
+                                <div className="results-container">
+                                    <div className="results-header">
+                                        <div>
+                                            <h3 className="results-title">Mileage Summary</h3>
+                                            <p className="results-subtitle">
+                                                Consensus IRS rate: ${mostCommonRate.toFixed(3)} per mile
+                                            </p>
+                                        </div>
+                                        <button 
+                                            className="btn btn-primary"
+                                            onClick={exportToExcel}
+                                        >
+                                            <DownloadIcon size={18} style={{marginRight: '8px'}} />
+                                            Export to Excel
+                                        </button>
+                                    </div>
+                                    
+                                    <div className="table-responsive">
+                                        <table>
+                                            <thead>
+                                                <tr>
+                                                    <th>Employee</th>
+                                                    <th>Total Miles</th>
+                                                    <th>Reimbursement</th>
+                                                    <th>Status</th>
+                                                    <th>Details</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {employees.map((employee, index) => (
+                                                    <React.Fragment key={index}>
+                                                        <tr>
+                                                            <td>
+                                                                <div className="employee-name">{employee.name}</div>
+                                                                <div className="file-name">{employee.fileName}</div>
+                                                            </td>
+                                                            <td>
+                                                                {employee.entryTotalMiles.toFixed(1)}
+                                                                {!employee.milesMatch && (
+                                                                    <div className="error-text">
+                                                                        (Reported: {employee.totalMiles.toFixed(1)})
+                                                                    </div>
+                                                                )}
+                                                            </td>
+                                                            <td>
+                                                                ${employee.consensusReimbursement.toFixed(2)}
+                                                                {Math.abs(employee.consensusReimbursement - employee.reportedReimbursement) > 0.01 && (
+                                                                    <div className="error-text">
+                                                                        (Reported: ${employee.reportedReimbursement.toFixed(2)})
+                                                                    </div>
+                                                                )}
+                                                                <div className="file-name">
+                                                                    Rate: ${employee.consensusRate.toFixed(3)}
+                                                                    {employee.irsRate !== employee.consensusRate && (
+                                                                        <span className="error-text">
+                                                                            (Reported: ${employee.irsRate.toFixed(3)})
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                {employee.milesMatch && Math.abs(employee.consensusReimbursement - employee.reportedReimbursement) <= 0.01 ? (
+                                                                    <span className="badge badge-valid">
+                                                                        <CheckIcon size={14} className="icon-sm" /> Valid
+                                                                    </span>
+                                                                ) : (
+                                                                    <span className="badge badge-error">
+                                                                        <AlertIcon size={14} className="icon-sm" /> Discrepancy
+                                                                    </span>
+                                                                )}
+                                                            </td>
+                                                            <td>
+                                                                <button 
+                                                                    className="view-toggle"
+                                                                    onClick={() => toggleEmployeeExpand(index)}
+                                                                >
+                                                                    {expandedEmployee === index ? 'Hide' : 'View'}
+                                                                    {expandedEmployee === index ? (
+                                                                        <ChevronUpIcon size={16} className="toggle-icon" />
+                                                                    ) : (
+                                                                        <ChevronDownIcon size={16} className="toggle-icon" />
+                                                                    )}
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                        
+                                                        {/* Expanded trip details */}
+                                                        {expandedEmployee === index && (
+                                                            <tr className="details-row">
+                                                                <td colSpan="5" className="details-content">
+                                                                    <h4 className="details-title">
+                                                                        <FileIcon size={18} style={{marginRight: '8px'}} />
+                                                                        Trip Details
+                                                                    </h4>
+                                                                    <div className="table-responsive">
+                                                                        <table className="details-table">
+                                                                            <thead>
+                                                                                <tr>
+                                                                                    <th>Date</th>
+                                                                                    <th>Purpose</th>
+                                                                                    <th>Description</th>
+                                                                                    <th>Miles</th>
+                                                                                </tr>
+                                                                            </thead>
+                                                                            <tbody>
+                                                                                {employee.entries.map((entry, entryIndex) => (
+                                                                                    <tr key={entryIndex}>
+                                                                                        <td>{formatExcelDate(entry.date)}</td>
+                                                                                        <td>{entry.purpose}</td>
+                                                                                        <td>{entry.description}</td>
+                                                                                        <td>{entry.miles.toFixed(1)}</td>
+                                                                                    </tr>
+                                                                                ))}
+                                                                                <tr className="total-row">
+                                                                                    <td colSpan="3" style={{textAlign: 'right'}}>
+                                                                                        Total:
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        {employee.entryTotalMiles.toFixed(1)}
+                                                                                    </td>
+                                                                                </tr>
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        )}
+                                                    </React.Fragment>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </main>
+                    
+                    {/* Footer */}
+                    <footer>
+                        <div className="container">
+                            <div className="footer-content">
+                                <div className="footer-logo">
+                                    <div className="footer-icon">
+                                        <HelmetIcon size={18} color="#333333" />
+                                    </div>
+                                    <div className="footer-name">T.W. FRIERSON CONTRACTOR, INC.</div>
+                                </div>
+                                <div className="footer-message">Build with Purpose</div>
+                            </div>
+                        </div>
+                    </footer>
+                    
+                    {/* Loading Overlay */}
+                    {loading && (
+                        <div className="loading-overlay">
+                            <div>
+                                <div className="loading-spinner"></div>
+                                <div className="loading-text">Processing files...</div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
         }
-      };
-      
-      // Handle file selection via input
-      const handleFileSelect = (e) => {
-        setError(null);
         
-        const selectedFiles = e.target.files;
-        if (selectedFiles.length > 0) {
-          const validFiles = Array.from(selectedFiles).filter(
-            file => file.name.endsWith('.xlsx') || file.name.endsWith('.xls')
-          );
-          
-          if (validFiles.length > 0) {
-            setFiles(validFiles);
-          } else {
-            setError("No Excel files found. Please select .xlsx or .xls files.");
-          }
-        }
-      };
-      
-      // Process files
-      const processFiles = async () => {
-        if (files.length === 0) return;
-        
-        setLoading(true);
-        setError(null);
-        setProcessingComplete(false);
-        setEmployees([]);
-        
-        try {
-          const processedEmployees = [];
-          const ratesCount = {};
-          
-          for (const file of files) {
-            try {
-              const arrayBuffer = await file.arrayBuffer();
-              const workbook = XLSX.read(arrayBuffer, {
-                type: 'array',
-                cellDates: true
-              });
-              
-              const firstSheetName = workbook.SheetNames[0];
-              const worksheet = workbook.Sheets[firstSheetName];
-              
-              // Get employee data
-              const employeeName = worksheet['B2']?.v || 'Unknown';
-              const totalMiles = parseFloat(worksheet['B3']?.v) || 0;
-              const irsRate = parseFloat(worksheet['B4']?.v) || 0;
-              const reportedReimbursement = parseFloat(worksheet['B5']?.v) || 0;
-              
-              // Count IRS rates for consensus
-              ratesCount[irsRate] = (ratesCount[irsRate] || 0) + 1;
-              
-              // Get individual entries
-              const entries = [];
-              let rowIndex = 7;
-              let entryTotalMiles = 0;
-              
-              while (worksheet[`A${rowIndex}`]) {
-                const date = worksheet[`A${rowIndex}`]?.v || '';
-                const purpose = worksheet[`B${rowIndex}`]?.v || '';
-                const description = worksheet[`C${rowIndex}`]?.v || '';
-                const miles = parseFloat(worksheet[`D${rowIndex}`]
+        // Render the app
+        ReactDOM.render(<MileageProcessor />, document.getElementById('app'));
+    </script>
+</body>
+</html>
